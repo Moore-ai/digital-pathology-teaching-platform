@@ -1,0 +1,175 @@
+'use client'
+
+import type { ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { getSidebarNav } from '@/config/navigation'
+import { ChevronRight, ChevronDown, X, Menu } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+
+interface SidebarProps {
+  className?: string
+  isOpen?: boolean
+  onClose?: () => void
+}
+
+export function Sidebar({ className, isOpen = true, onClose }: SidebarProps): ReactNode {
+  const pathname = usePathname()
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const navConfig = getSidebarNav(pathname)
+
+  // 路由变化时关闭移动端菜单
+  useEffect(() => {
+    onClose?.()
+  }, [pathname, onClose])
+
+  if (!navConfig) return null
+
+  const toggleExpand = (title: string) => {
+    setExpandedItems(prev =>
+      prev.includes(title)
+        ? prev.filter(i => i !== title)
+        : [...prev, title]
+    )
+  }
+
+  return (
+    <>
+      {/* 移动端遮罩 */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={cn(
+        "w-64 border-r bg-white shrink-0",
+        // 移动端：固定定位，可滑出
+        "fixed lg:relative inset-y-0 left-0 z-50",
+        "transform transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        className
+      )}>
+        {/* 移动端关闭按钮 */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b">
+          <span className="font-medium">{navConfig.title}</span>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <div className="p-4">
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 hidden lg:block">
+            {navConfig.title}
+          </h2>
+          <nav className="space-y-1">
+            {navConfig.items.map((item) => (
+              <NavItem
+                key={item.href}
+                item={item}
+                pathname={pathname}
+                expanded={expandedItems.includes(item.title)}
+                onToggle={() => toggleExpand(item.title)}
+              />
+            ))}
+          </nav>
+        </div>
+      </aside>
+    </>
+  )
+}
+
+interface NavItemProps {
+  item: {
+    title: string
+    href: string
+    icon?: React.ComponentType<{ className?: string }>
+    children?: Array<{ title: string; href: string }>
+  }
+  pathname: string
+  expanded: boolean
+  onToggle: () => void
+}
+
+function NavItem({ item, pathname, expanded, onToggle }: NavItemProps): ReactNode {
+  const isActive = pathname === item.href
+  const hasChildren = item.children && item.children.length > 0
+  const Icon = item.icon
+
+  if (hasChildren) {
+    return (
+      <div>
+        <button
+          onClick={onToggle}
+          className={cn(
+            "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+            "hover:bg-muted text-foreground"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            {Icon && <Icon className="w-4 h-4" />}
+            <span>{item.title}</span>
+          </div>
+          {expanded ? (
+            <ChevronDown className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
+        </button>
+        {expanded && item.children && (
+          <div className="ml-4 mt-1 space-y-1">
+            {item.children.map((child) => {
+              const childActive = pathname === child.href
+              return (
+                <Link
+                  key={child.href}
+                  href={child.href}
+                  className={cn(
+                    "block px-3 py-2 rounded-lg text-sm transition-colors",
+                    childActive
+                      ? "bg-secondary text-white"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {child.title}
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+        isActive
+          ? "bg-secondary text-white"
+          : "text-foreground hover:bg-muted"
+      )}
+    >
+      {Icon && <Icon className="w-4 h-4" />}
+      {item.title}
+    </Link>
+  )
+}
+
+// 移动端菜单按钮
+export function MobileMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="lg:hidden"
+      onClick={onClick}
+    >
+      <Menu className="w-5 h-5" />
+    </Button>
+  )
+}

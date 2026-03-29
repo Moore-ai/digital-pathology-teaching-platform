@@ -1,3 +1,6 @@
+/* 字体导入 - 必须放在最前面 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:wght@400;600;700&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -5,40 +8,58 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* 基础颜色 */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --font-heading: "Source Serif 4", serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+  --font-data: "JetBrains Mono", monospace;
+
+  /* 组件颜色 */
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* 功能语义色 */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-annotation: var(--annotation);
+
+  /* 图表颜色 */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* 侧边栏颜色 */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* 圆角 */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,75 +67,132 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* 字阶 */
+  --font-hero: 3.5rem;
+  --font-h1: 2.25rem;
+  --font-h2: 1.75rem;
+  --font-h3: 1.25rem;
+  --font-h4: 1rem;
+  --font-body-lg: 1.125rem;
+  --font-body: 1rem;
+  --font-body-sm: 0.875rem;
+  --font-caption: 0.75rem;
+
+  /* 动画 */
+  --animate-fade-in-up: fade-in-up 0.4s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* 设计规范色彩系统 - 临床蓝主题 */
+  --background: #F8FAFC;
+  --foreground: #374151;
+
+  --card: #FFFFFF;
+  --card-foreground: #374151;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #374151;
+
+  /* 主色调 - 临床蓝 */
+  --primary: #1E3A5F;
+  --primary-foreground: #F8FAFC;
+
+  /* 次主色 - 病理青 */
+  --secondary: #2D8B8B;
+  --secondary-foreground: #F8FAFC;
+
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+
+  /* 强调色 - 诊断橙 */
+  --accent: #E86A33;
+  --accent-foreground: #F8FAFC;
+
+  --destructive: #EF4444;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #2D8B8B;
+
+  /* 功能语义色 */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+  --annotation: #8B5CF6;
+
+  /* 图表颜色 */
+  --chart-1: #1E3A5F;
+  --chart-2: #2D8B8B;
+  --chart-3: #E86A33;
+  --chart-4: #10B981;
+  --chart-5: #8B5CF6;
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* 侧边栏 */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #1E3A5F;
+  --sidebar-primary-foreground: #F8FAFC;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #374151;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #2D8B8B;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* 暗色模式 - 夜视显微镜主题 */
+  --background: #0F172A;
+  --foreground: #E2E8F0;
+
+  --card: #1E293B;
+  --card-foreground: #E2E8F0;
+
+  --popover: #1E293B;
+  --popover-foreground: #E2E8F0;
+
+  --primary: #38BDF8;
+  --primary-foreground: #0F172A;
+
+  --secondary: #2D8B8B;
+  --secondary-foreground: #F8FAFC;
+
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+
+  --accent: #E86A33;
+  --accent-foreground: #F8FAFC;
+
+  --destructive: #F87171;
+  --border: #334155;
+  --input: #334155;
+  --ring: #38BDF8;
+
+  /* 功能语义色 - 暗色模式 */
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+  --annotation: #A78BFA;
+
+  /* 图表颜色 */
+  --chart-1: #38BDF8;
+  --chart-2: #2D8B8B;
+  --chart-3: #E86A33;
+  --chart-4: #34D399;
+  --chart-5: #A78BFA;
+
+  --sidebar: #1E293B;
+  --sidebar-foreground: #E2E8F0;
+  --sidebar-primary: #38BDF8;
+  --sidebar-primary-foreground: #0F172A;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #E2E8F0;
+  --sidebar-border: #334155;
+  --sidebar-ring: #38BDF8;
 }
 
 @layer base {
@@ -122,9 +200,131 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* 学习轨迹进度条 - 预定义宽度 */
+  .progress-bar[data-width="52"] { width: 52%; }
+  .progress-bar[data-width="54"] { width: 54%; }
+  .progress-bar[data-width="56"] { width: 56%; }
+  .progress-bar[data-width="58"] { width: 58%; }
+  .progress-bar[data-width="60"] { width: 60%; }
+  .progress-bar[data-width="62"] { width: 62%; }
+  .progress-bar[data-width="64"] { width: 64%; }
+  .progress-bar[data-width="66"] { width: 66%; }
+  .progress-bar[data-width="68"] { width: 68%; }
+  .progress-bar[data-width="70"] { width: 70%; }
+  .progress-bar[data-width="72"] { width: 72%; }
+  .progress-bar[data-width="74"] { width: 74%; }
+  .progress-bar[data-width="76"] { width: 76%; }
+  .progress-bar[data-width="78"] { width: 78%; }
+  .progress-bar[data-width="80"] { width: 80%; }
+  .progress-bar[data-width="82"] { width: 82%; }
+  .progress-bar[data-width="84"] { width: 84%; }
+  .progress-bar[data-width="86"] { width: 86%; }
+  .progress-bar[data-width="88"] { width: 88%; }
+  .progress-bar[data-width="90"] { width: 90%; }
+  .progress-bar[data-width="92"] { width: 92%; }
+  .progress-bar[data-width="94"] { width: 94%; }
+  .progress-bar[data-width="96"] { width: 96%; }
+  .progress-bar[data-width="98"] { width: 98%; }
+  .progress-bar[data-width="100"] { width: 100%; }
+
+  /* 视频进度条 - 预定义宽度 */
+  .video-progress-bar[data-progress="0"] { width: 0%; }
+  .video-progress-bar[data-progress="5"] { width: 5%; }
+  .video-progress-bar[data-progress="10"] { width: 10%; }
+  .video-progress-bar[data-progress="15"] { width: 15%; }
+  .video-progress-bar[data-progress="20"] { width: 20%; }
+  .video-progress-bar[data-progress="25"] { width: 25%; }
+  .video-progress-bar[data-progress="30"] { width: 30%; }
+  .video-progress-bar[data-progress="35"] { width: 35%; }
+  .video-progress-bar[data-progress="40"] { width: 40%; }
+  .video-progress-bar[data-progress="45"] { width: 45%; }
+  .video-progress-bar[data-progress="50"] { width: 50%; }
+  .video-progress-bar[data-progress="55"] { width: 55%; }
+  .video-progress-bar[data-progress="60"] { width: 60%; }
+  .video-progress-bar[data-progress="65"] { width: 65%; }
+  .video-progress-bar[data-progress="70"] { width: 70%; }
+  .video-progress-bar[data-progress="75"] { width: 75%; }
+  .video-progress-bar[data-progress="80"] { width: 80%; }
+  .video-progress-bar[data-progress="85"] { width: 85%; }
+  .video-progress-bar[data-progress="90"] { width: 90%; }
+  .video-progress-bar[data-progress="95"] { width: 95%; }
+  .video-progress-bar[data-progress="100"] { width: 100%; }
+
+  /* 答题卡进度条 - 预定义宽度 */
+  .answer-progress[data-progress="0"] { width: 0%; }
+  .answer-progress[data-progress="5"] { width: 5%; }
+  .answer-progress[data-progress="10"] { width: 10%; }
+  .answer-progress[data-progress="15"] { width: 15%; }
+  .answer-progress[data-progress="20"] { width: 20%; }
+  .answer-progress[data-progress="25"] { width: 25%; }
+  .answer-progress[data-progress="30"] { width: 30%; }
+  .answer-progress[data-progress="35"] { width: 35%; }
+  .answer-progress[data-progress="40"] { width: 40%; }
+  .answer-progress[data-progress="45"] { width: 45%; }
+  .answer-progress[data-progress="50"] { width: 50%; }
+  .answer-progress[data-progress="55"] { width: 55%; }
+  .answer-progress[data-progress="60"] { width: 60%; }
+  .answer-progress[data-progress="65"] { width: 65%; }
+  .answer-progress[data-progress="70"] { width: 70%; }
+  .answer-progress[data-progress="75"] { width: 75%; }
+  .answer-progress[data-progress="80"] { width: 80%; }
+  .answer-progress[data-progress="85"] { width: 85%; }
+  .answer-progress[data-progress="90"] { width: 90%; }
+  .answer-progress[data-progress="95"] { width: 95%; }
+  .answer-progress[data-progress="100"] { width: 100%; }
+
+  /* 标注图标 - 使用 CSS 变量传递颜色 */
+  .annotation-icon-bg {
+    background-color: color-mix(in srgb, var(--annotation-color) 12.5%, transparent);
+  }
+  .annotation-icon-color {
+    color: var(--annotation-color);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { PageWrapper } from '@/components/layout'
+import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +18,7 @@ import {
   RefreshCw,
   Eye,
   Save,
+  Shield,
 } from 'lucide-react'
 import { CourseCategoryLabels } from '@/types/course'
 
@@ -28,6 +30,9 @@ interface QuestionTypeConfig {
 }
 
 export default function CreateExamPage(): ReactNode {
+  const { user } = useAuthStore()
+  const canCreateExam = user?.role === 'teacher' || user?.role === 'admin'
+
   const [examName, setExamName] = useState('')
   const [duration, setDuration] = useState(90)
   const [mode, setMode] = useState<'ai' | 'manual' | 'random'>('ai')
@@ -47,6 +52,27 @@ export default function CreateExamPage(): ReactNode {
     { type: 'judgment', label: '判断题', count: 10, scorePerQuestion: 1 },
     { type: 'short_answer', label: '简答题', count: 2, scorePerQuestion: 10 },
   ])
+
+  // 权限检查
+  if (!canCreateExam) {
+    return (
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+          <Card className="w-full max-w-md">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">权限不足</h3>
+              <p className="text-sm text-muted-foreground">
+                智能组卷功能仅对教师和管理员开放，学生无法创建试卷。
+              </p>
+            </div>
+          </Card>
+        </div>
+      </PageWrapper>
+    )
+  }
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>

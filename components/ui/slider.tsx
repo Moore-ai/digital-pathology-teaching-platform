@@ -26,6 +26,18 @@ function Slider({
   onValueChange,
   ...props
 }: SliderProps) {
+  // Base UI Slider returns a single number, but we want to match the array API
+  const handleValueChange = React.useCallback(
+    (value: number | number[]) => {
+      if (onValueChange) {
+        // Base UI returns a single number for single thumb sliders
+        const newValue = Array.isArray(value) ? value : [value]
+        onValueChange(newValue)
+      }
+    },
+    [onValueChange]
+  )
+
   return (
     <SliderPrimitive.Root
       className={cn(
@@ -39,7 +51,7 @@ function Slider({
       max={max}
       step={step}
       disabled={disabled}
-      onValueChange={onValueChange}
+      onValueChange={handleValueChange}
       {...props}
     >
       <SliderPrimitive.Control className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20">

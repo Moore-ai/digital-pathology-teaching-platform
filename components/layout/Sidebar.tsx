@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getSidebarNav } from '@/config/navigation'
+import { useAuthStore } from '@/stores/authStore'
 import { ChevronRight, ChevronDown, X, Menu } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
@@ -17,14 +18,30 @@ interface SidebarProps {
 
 export function Sidebar({ className, isOpen = true, onClose }: SidebarProps): ReactNode {
   const pathname = usePathname()
+  const { user } = useAuthStore()
   const [userExpandedItems, setUserExpandedItems] = useState<string[]>([])
   const navConfig = getSidebarNav(pathname)
 
+  // 根据用户角色过滤导航项
+  const filteredItems = useMemo(() => {
+    if (!navConfig) return []
+    return navConfig.items.filter(item => {
+      if (!item.roles) return true
+      return user && item.roles.includes(user.role)
+    }).map(item => ({
+      ...item,
+      children: item.children?.filter(child => {
+        if (!child.roles) return true
+        return user && child.roles.includes(user.role)
+      })
+    }))
+  }, [navConfig, user])
+
   // 计算应该自动展开的菜单项
   const autoExpandedItems = useMemo(() => {
-    if (!navConfig) return []
+    if (!filteredItems) return []
     const items: string[] = []
-    navConfig.items.forEach(item => {
+    filteredItems.forEach(item => {
       if (item.children) {
         const hasActiveChild = item.children.some(child =>
           pathname === child.href || pathname.startsWith(child.href + '/')
@@ -36,7 +53,7 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps): Re
       }
     })
     return items
-  }, [pathname, navConfig])
+  }, [pathname, filteredItems])
 
   // 合并自动展开和用户手动展开的项
   const expandedItems = useMemo(() => {
@@ -90,7 +107,7 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps): Re
             {navConfig.title}
           </h2>
           <nav className="space-y-1">
-            {navConfig.items.map((item) => (
+            {filteredItems.map((item) => (
               <NavItem
                 key={item.href}
                 item={item}

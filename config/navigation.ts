@@ -21,6 +21,8 @@ export interface NavItem {
   icon?: LucideIcon
   badge?: string | number
   children?: NavItem[]
+  /** 允许访问的角色，不设置则表示所有角色都可访问 */
+  roles?: Array<'student' | 'teacher' | 'admin'>
 }
 
 export interface NavigationConfig {
@@ -85,7 +87,7 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
     items: [
       ...coreNavItems,
       { title: '考试中心', href: '/exams', icon: ClipboardList },
-      { title: '智能组卷', href: '/exams/create', icon: PlusCircle },
+      { title: '智能组卷', href: '/exams/create', icon: PlusCircle, roles: ['teacher', 'admin'] },
       { title: '成绩查询', href: '/exams/results', icon: BarChart3 },
     ],
   },

@@ -69,7 +69,7 @@ export function Sidebar({ className, isOpen = true, onClose }: SidebarProps): Re
       )}
 
       <aside className={cn(
-        "w-64 border-r bg-white shrink-0",
+        "w-64 border-r bg-card shrink-0",
         // 移动端：固定定位，可滑出，z-index 低于 Header(50) 高于遮罩(40)
         // 桌面端：相对定位，不设置 z-index
         "fixed lg:relative inset-y-0 left-0 z-45 lg:z-0",

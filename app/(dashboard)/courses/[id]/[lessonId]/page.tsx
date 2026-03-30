@@ -15,7 +15,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   ChevronLeft,
   ChevronRight,
-  BookOpen,
   Clock,
   User,
   Star,
@@ -24,19 +23,44 @@ import {
 import { formatDuration } from '@/lib/utils'
 import { CourseCategoryLabels } from '@/types/course'
 
-interface CoursePageProps {
-  params: Promise<{ id: string }>
+interface LessonPageProps {
+  params: Promise<{ id: string; lessonId: string }>
 }
 
-export default function CoursePage({ params }: CoursePageProps): ReactNode {
-  const { id } = use(params)
+export default function LessonPage({ params }: LessonPageProps): ReactNode {
+  const { id, lessonId } = use(params)
   const course = getCourseById(id)
 
   if (!course) {
     notFound()
   }
 
-  const currentLesson = course.chapters[0]?.lessons[0]
+  // 查找当前课时
+  let currentLesson = null
+  let currentChapter = null
+
+  for (let i = 0; i < course.chapters.length; i++) {
+    const chapter = course.chapters[i]
+    const idx = chapter.lessons.findIndex(l => l.id === lessonId)
+    if (idx !== -1) {
+      currentLesson = chapter.lessons[idx]
+      currentChapter = chapter
+      break
+    }
+  }
+
+  if (!currentLesson) {
+    notFound()
+  }
+
+  // 获取上一课和下一课
+  const allLessons = course.chapters.flatMap((ch, chIdx) =>
+    ch.lessons.map((l, lIdx) => ({ lesson: l, chapter: ch, chIdx, lIdx }))
+  )
+  const currentIdx = allLessons.findIndex(item => item.lesson.id === lessonId)
+  const prevLesson = currentIdx > 0 ? allLessons[currentIdx - 1] : null
+  const nextLesson = currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null
+
   const categoryLabel = CourseCategoryLabels[course.category]
 
   return (
@@ -47,7 +71,11 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
           课程中心
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-foreground">{course.title}</span>
+        <Link href={`/courses/${course.id}`} className="hover:text-foreground transition-colors">
+          {course.title}
+        </Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-foreground">{currentLesson.title}</span>
       </nav>
 
       {/* 课程标题区 */}
@@ -55,15 +83,15 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Badge variant="secondary">{categoryLabel}</Badge>
-            {course.status === 'completed' && (
+            {currentLesson.completed && (
               <Badge className="bg-success text-white">已完成</Badge>
             )}
           </div>
           <h1 className="text-2xl font-heading font-semibold text-foreground">
-            {course.title}
+            {currentLesson.title}
           </h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">
-            {course.description}
+          <p className="text-muted-foreground mt-2">
+            {currentChapter?.title} · {course.title}
           </p>
 
           {/* 课程信息 */}
@@ -73,12 +101,8 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
               {course.instructor.name}
             </span>
             <span className="flex items-center gap-1">
-              <BookOpen className="w-4 h-4" />
-              {course.totalLessons} 课时
-            </span>
-            <span className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {formatDuration(course.duration)}
+              {formatDuration(currentLesson.duration)}
             </span>
           </div>
         </div>
@@ -91,7 +115,6 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
           <Button variant="outline" size="icon">
             <Share2 className="w-4 h-4" />
           </Button>
-          <Button>继续学习</Button>
         </div>
       </div>
 
@@ -102,33 +125,42 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
         {/* 播放器区域 */}
         <div className="lg:col-span-2 space-y-4">
           {/* 播放器 */}
-          {currentLesson && (
-            <>
-              <CoursePlayer lesson={currentLesson} />
+          <CoursePlayer lesson={currentLesson} />
 
-              {/* 课时信息 */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-medium text-foreground">
-                    {currentLesson.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {course.chapters[0].title}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
+          {/* 课时导航 */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {prevLesson ? (
+                <Link href={`/courses/${course.id}/${prevLesson.lesson.id}`}>
                   <Button variant="outline" size="sm">
                     <ChevronLeft className="w-4 h-4 mr-1" />
                     上一课
                   </Button>
+                </Link>
+              ) : (
+                <Button variant="outline" size="sm" disabled>
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  上一课
+                </Button>
+              )}
+              {nextLesson ? (
+                <Link href={`/courses/${course.id}/${nextLesson.lesson.id}`}>
                   <Button variant="outline" size="sm">
                     下一课
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
-                </div>
-              </div>
-            </>
-          )}
+                </Link>
+              ) : (
+                <Button variant="outline" size="sm" disabled>
+                  下一课
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              )}
+            </div>
+            <span className="text-sm text-muted-foreground">
+              第 {currentIdx + 1} / {allLessons.length} 课
+            </span>
+          </div>
 
           {/* 讲师信息 */}
           <div className="p-4 rounded-lg border bg-card">
@@ -155,7 +187,7 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
             <h3 className="text-base font-medium text-foreground mb-3">课程目录</h3>
             <ChapterList
               chapters={course.chapters}
-              currentLessonId={currentLesson?.id}
+              currentLessonId={currentLesson.id}
               courseId={course.id}
             />
 

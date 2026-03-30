@@ -8,7 +8,7 @@ export const mockDiscussions: Discussion[] = [
     author: {
       id: 'S001',
       name: '李同学',
-      avatar: '/avatars/student1.jpg',
+      avatar: '',
       role: 'student',
     },
     category: 'slice',

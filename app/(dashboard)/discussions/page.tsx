@@ -4,7 +4,10 @@ import type { ReactNode } from 'react'
 import { useState, useMemo } from 'react'
 import { PageWrapper } from '@/components/layout'
 import { DiscussionCard, CreatePostDialog } from '@/components/features/discussion'
-import { mockDiscussions, discussionStats } from '@/lib/mock/discussions'
+import { useDiscussionStore } from '@/stores/discussionStore'
+import type { DiscussionCategory } from '@/types/discussion'
+import { discussionStats } from '@/lib/mock/discussions'
+import { useAuthStore } from '@/stores/authStore'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -22,10 +25,30 @@ type TabValue = 'all' | 'latest' | 'hot' | 'unsolved' | 'pinned'
 export default function DiscussionsPage(): ReactNode {
   const [activeTab, setActiveTab] = useState<TabValue>('all')
   const [searchKeyword, setSearchKeyword] = useState('')
+  const { discussions, addDiscussion } = useDiscussionStore()
+  const { user } = useAuthStore()
+
+  // 处理发帖
+  const handleCreatePost = (data: { title: string; content: string; category: DiscussionCategory; tags: string[] }) => {
+    addDiscussion({
+      title: data.title,
+      content: data.content,
+      category: data.category,
+      tags: data.tags,
+      author: {
+        id: user?.id || 'anonymous',
+        name: user?.name || '匿名用户',
+        avatar: user?.avatar || '',
+        role: user?.role || 'student',
+      },
+      isPinned: false,
+      isSolved: false,
+    })
+  }
 
   // 筛选讨论
   const filteredDiscussions = useMemo(() => {
-    let result = mockDiscussions
+    let result = discussions
 
     // 标签筛选
     switch (activeTab) {
@@ -56,7 +79,7 @@ export default function DiscussionsPage(): ReactNode {
     }
 
     return result
-  }, [activeTab, searchKeyword])
+  }, [activeTab, searchKeyword, discussions])
 
   return (
     <PageWrapper className="space-y-6">
@@ -68,7 +91,7 @@ export default function DiscussionsPage(): ReactNode {
             与同学和老师交流学习心得、讨论疑难问题
           </p>
         </div>
-        <CreatePostDialog />
+        <CreatePostDialog onSubmit={handleCreatePost} />
       </div>
 
       {/* 统计卡片 */}

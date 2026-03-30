@@ -59,7 +59,7 @@ export function LearningChart({ className }: LearningChartProps): ReactNode {
         <CardContent>
           <div className="h-64">
             {mounted ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={weeklyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#6B7280" />
@@ -99,7 +99,7 @@ export function LearningChart({ className }: LearningChartProps): ReactNode {
         <CardContent>
           <div className="h-64">
             {mounted ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />

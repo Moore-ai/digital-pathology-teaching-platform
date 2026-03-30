@@ -41,7 +41,6 @@ export interface Point {
 
 export type ToolType =
   | 'pan'       // 平移
-  | 'zoom'      // 缩放
   | 'pen'       // 画笔
   | 'measure'   // 测量
   | 'count'     // 计数

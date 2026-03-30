@@ -25,18 +25,20 @@ export default function SettingsPage(): ReactNode {
 
   if (!isAdmin) {
     return (
-      <PageWrapper className="flex items-center justify-center">
-        <Card className="max-w-md text-center">
-          <CardHeader>
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-muted-foreground" />
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+          <Card className="w-full max-w-md">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">权限不足</h3>
+              <p className="text-sm text-muted-foreground">
+                您没有访问系统设置的权限，请联系管理员。
+              </p>
             </div>
-            <CardTitle>权限不足</CardTitle>
-            <CardDescription>
-              您没有访问系统设置的权限，请联系管理员。
-            </CardDescription>
-          </CardHeader>
-        </Card>
+          </Card>
+        </div>
       </PageWrapper>
     )
   }

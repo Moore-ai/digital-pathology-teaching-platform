@@ -15,7 +15,7 @@ export const mockCourses: Course[] = [
       id: 't1',
       name: '张教授',
       title: '主任医师',
-      avatar: '/avatars/teacher1.png',
+      avatar: '',
       bio: '从事病理诊断工作20余年，擅长消化系统病理诊断',
     },
     chapters: [
@@ -77,7 +77,7 @@ export const mockCourses: Course[] = [
       id: 't2',
       name: '李教授',
       title: '副主任医师',
-      avatar: '/avatars/teacher2.png',
+      avatar: '',
     },
     chapters: [
       {
@@ -140,7 +140,7 @@ export const mockCourses: Course[] = [
       id: 't3',
       name: '王教授',
       title: '主任医师',
-      avatar: '/avatars/teacher3.png',
+      avatar: '',
     },
     chapters: [],
     createdAt: new Date('2024-08-01'),

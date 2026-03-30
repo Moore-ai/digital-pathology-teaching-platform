@@ -67,7 +67,7 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
       <CardContent>
         <div className="h-72">
           {mounted ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <LineChart data={examScoreData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                 <XAxis

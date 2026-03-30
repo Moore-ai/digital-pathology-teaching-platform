@@ -32,7 +32,7 @@ export const mainNavigation: NavItem[] = [
   { title: '首页', href: '/', icon: Home },
   { title: '课程中心', href: '/courses', icon: BookOpen },
   { title: '切片库', href: '/slices', icon: Microscope },
-  { title: '考试中心', href: '/exam', icon: ClipboardList },
+  { title: '考试中心', href: '/exams', icon: ClipboardList },
   { title: '讨论', href: '/discussions', icon: MessageSquare },
 ]
 
@@ -61,13 +61,13 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
       { title: '上传切片', href: '/slices/upload', icon: PlusCircle },
     ],
   },
-  exam: {
+  exams: {
     title: '考试中心',
     items: [
-      { title: '考试列表', href: '/exam', icon: ClipboardList },
-      { title: '智能组卷', href: '/exam/create', icon: PlusCircle },
-      { title: '成绩查询', href: '/exam/results', icon: BarChart3 },
-      { title: '题库管理', href: '/exam/questions', icon: FileText },
+      { title: '考试列表', href: '/exams', icon: ClipboardList },
+      { title: '智能组卷', href: '/exams/create', icon: PlusCircle },
+      { title: '成绩查询', href: '/exams/results', icon: BarChart3 },
+      { title: '题库管理', href: '/exams/questions', icon: FileText },
     ],
   },
   discussions: {

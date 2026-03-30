@@ -162,8 +162,6 @@ export function SliceViewer({
     switch (currentTool) {
       case 'pan':
         return isDragging ? 'grabbing' : 'grab'
-      case 'zoom':
-        return 'zoom-in'
       case 'pen':
         return 'crosshair'
       case 'measure':
@@ -377,7 +375,6 @@ export function SliceViewer({
           <span className="text-white/40">工具:</span>
           <span className="text-secondary">
             {currentTool === 'pan' && '平移'}
-            {currentTool === 'zoom' && '缩放'}
             {currentTool === 'pen' && '画笔'}
             {currentTool === 'measure' && '测量'}
             {currentTool === 'count' && '计数'}

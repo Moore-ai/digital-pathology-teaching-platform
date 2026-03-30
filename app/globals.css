@@ -296,6 +296,29 @@
   .annotation-icon-color {
     color: var(--annotation-color);
   }
+
+  /* 课程进度条 */
+  .course-progress[data-progress="0"] { width: 0%; }
+  .course-progress[data-progress="5"] { width: 5%; }
+  .course-progress[data-progress="10"] { width: 10%; }
+  .course-progress[data-progress="15"] { width: 15%; }
+  .course-progress[data-progress="20"] { width: 20%; }
+  .course-progress[data-progress="25"] { width: 25%; }
+  .course-progress[data-progress="30"] { width: 30%; }
+  .course-progress[data-progress="35"] { width: 35%; }
+  .course-progress[data-progress="40"] { width: 40%; }
+  .course-progress[data-progress="45"] { width: 45%; }
+  .course-progress[data-progress="50"] { width: 50%; }
+  .course-progress[data-progress="55"] { width: 55%; }
+  .course-progress[data-progress="60"] { width: 60%; }
+  .course-progress[data-progress="65"] { width: 65%; }
+  .course-progress[data-progress="70"] { width: 70%; }
+  .course-progress[data-progress="75"] { width: 75%; }
+  .course-progress[data-progress="80"] { width: 80%; }
+  .course-progress[data-progress="85"] { width: 85%; }
+  .course-progress[data-progress="90"] { width: 90%; }
+  .course-progress[data-progress="95"] { width: 95%; }
+  .course-progress[data-progress="100"] { width: 100%; }
 }
 
 @keyframes fade-in-up {

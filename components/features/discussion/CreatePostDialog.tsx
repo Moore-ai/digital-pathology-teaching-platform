@@ -76,7 +76,7 @@ export function CreatePostDialog({ trigger, onSubmit }: CreatePostDialogProps): 
           发起讨论
         </Button>
       )} />
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-150">
         <DialogHeader>
           <DialogTitle>发起讨论</DialogTitle>
           <DialogDescription>
@@ -116,7 +116,7 @@ export function CreatePostDialog({ trigger, onSubmit }: CreatePostDialogProps): 
           <div className="space-y-2">
             <label className="text-sm font-medium">内容</label>
             <textarea
-              className="w-full min-h-[150px] p-3 rounded-lg border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full min-h-37.5 p-3 rounded-lg border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
               placeholder="请输入讨论内容..."
               value={content}
               onChange={(e) => setContent(e.target.value)}

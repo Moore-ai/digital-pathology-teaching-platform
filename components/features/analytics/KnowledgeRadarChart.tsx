@@ -49,7 +49,7 @@ export function KnowledgeRadarChart({
       <CardContent>
         <div className="h-80">
           {mounted ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <RadarChart data={data}>
                 <PolarGrid stroke="#E5E7EB" />
                 <PolarAngleAxis

@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/tooltip'
 import {
   Move,
-  ZoomIn,
   Pencil,
   Ruler,
   Hash,
@@ -45,7 +44,6 @@ interface ToolItem {
 
 const tools: ToolItem[] = [
   { id: 'pan', icon: Move, label: '平移', shortcut: 'P' },
-  { id: 'zoom', icon: ZoomIn, label: '缩放', shortcut: 'Z' },
   { id: 'pen', icon: Pencil, label: '画笔标注', shortcut: 'B' },
   { id: 'measure', icon: Ruler, label: '测量', shortcut: 'M' },
   { id: 'count', icon: Hash, label: '计数', shortcut: 'C' },

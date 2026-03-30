@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -112,37 +113,45 @@ export function Header({ className, children }: HeaderProps): ReactNode {
               }
             />
             <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  <span className="text-xs text-secondary mt-1">
-                    {ROLES[user?.role || 'student']}
-                  </span>
-                </div>
-              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <span className="text-xs text-secondary mt-1">
+                      {ROLES[user?.role || 'student']}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
 
               {/* 角色切换（开发模式） */}
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                切换角色（原型演示）
-              </DropdownMenuLabel>
-              {Object.entries(ROLES).map(([role, label]) => (
-                <DropdownMenuItem
-                  key={role}
-                  onClick={() => switchRole(role as 'student' | 'teacher' | 'admin')}
-                  className={cn(user?.role === role && "bg-muted")}
-                >
-                  {label}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  切换角色（原型演示）
+                </DropdownMenuLabel>
+                {Object.entries(ROLES).map(([role, label]) => (
+                  <DropdownMenuItem
+                    key={role}
+                    onClick={() => switchRole(role as 'student' | 'teacher' | 'admin')}
+                    className={cn(user?.role === role && "bg-muted")}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                render={<Link href="/profile" className="flex items-center" />}
+              >
                 <User className="w-4 h-4 mr-2" />
                 个人中心
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                render={<Link href="/settings" className="flex items-center" />}
+              >
                 <Settings className="w-4 h-4 mr-2" />
                 设置
               </DropdownMenuItem>

@@ -21,11 +21,11 @@ export function CourseCard({ className, course }: CourseCardProps): ReactNode {
   return (
     <Link href={`/courses/${course.id}`}>
       <Card className={cn(
-        "group cursor-pointer transition-all hover:shadow-lg hover:border-secondary overflow-hidden",
+        "group cursor-pointer transition-all hover:shadow-lg hover:border-secondary overflow-hidden h-full flex flex-col",
         className
       )}>
         {/* 封面图区域 */}
-        <div className="relative h-40 bg-linear-to-br from-primary/5 to-secondary/5 overflow-hidden">
+        <div className="relative h-40 bg-linear-to-br from-primary/5 to-secondary/5 overflow-hidden shrink-0">
           {/* 状态标签 */}
           <div className="absolute top-3 left-3 flex gap-2">
             <Badge variant="secondary" className="text-xs">
@@ -34,6 +34,11 @@ export function CourseCard({ className, course }: CourseCardProps): ReactNode {
             {course.status === 'completed' && (
               <Badge className="bg-success text-white text-xs">
                 已完成
+              </Badge>
+            )}
+            {course.status === 'not_started' && (
+              <Badge variant="outline" className="bg-white/90 text-xs">
+                未开始
               </Badge>
             )}
           </div>
@@ -59,7 +64,7 @@ export function CourseCard({ className, course }: CourseCardProps): ReactNode {
           </div>
         </div>
 
-        <CardContent className="pt-4">
+        <CardContent className="pt-4 flex-1 flex flex-col">
           {/* 标题 */}
           <CardTitle className="text-base line-clamp-1 group-hover:text-secondary transition-colors">
             {course.title}
@@ -90,16 +95,18 @@ export function CourseCard({ className, course }: CourseCardProps): ReactNode {
             </span>
           </div>
 
-          {/* 进度条 */}
-          {course.status !== 'not_started' && (
-            <div className="mt-3">
+          {/* 进度条区域 - 始终占据相同高度 */}
+          <div className="mt-3 min-h-[6px]">
+            {course.status !== 'not_started' ? (
               <Progress value={course.progress}>
                 <ProgressTrack className="h-1.5">
                   <ProgressIndicator className="bg-secondary" />
                 </ProgressTrack>
               </Progress>
-            </div>
-          )}
+            ) : (
+              <div className="h-1.5 bg-muted rounded-full" />
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>

@@ -64,7 +64,7 @@ export default function SlicesPage(): ReactNode {
 
       {/* 切片网格 */}
       {filteredSlices.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
           {filteredSlices.map((slice) => (
             <SliceCard key={slice.id} slice={slice} />
           ))}

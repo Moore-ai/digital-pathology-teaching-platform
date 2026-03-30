@@ -94,7 +94,7 @@ export default function CoursesPage(): ReactNode {
 
       {/* 课程列表 */}
       {filteredCourses.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filteredCourses.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}

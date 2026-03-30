@@ -85,7 +85,7 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
   }
 
   return (
-    <Card className={cn("group hover:shadow-md transition-all", className)}>
+    <Card className={cn("group hover:shadow-md transition-all h-full flex flex-col", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
@@ -98,7 +98,7 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
         </div>
       </CardHeader>
 
-      <CardContent className="pb-3">
+      <CardContent className="pb-3 flex-1">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="w-4 h-4" />
@@ -133,7 +133,7 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
         )}
       </CardContent>
 
-      <CardFooter className="pt-0">
+      <CardFooter className="mt-auto">
         {renderActionButton()}
       </CardFooter>
     </Card>

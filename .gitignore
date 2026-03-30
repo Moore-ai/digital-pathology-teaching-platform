@@ -42,3 +42,5 @@ next-env.d.ts
 
 docs
 .claude
+AGENTS.md
+CLAUDE.md

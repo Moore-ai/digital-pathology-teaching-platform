@@ -14,6 +14,7 @@ import {
   Settings,
   Microscope,
   ChevronDown,
+  GraduationCap,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -149,6 +150,12 @@ export function Header({ className, children }: HeaderProps): ReactNode {
               >
                 <User className="w-4 h-4 mr-2" />
                 个人中心
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                render={<Link href="/my-learning" className="flex items-center" />}
+              >
+                <GraduationCap className="w-4 h-4 mr-2" />
+                我的学习
               </DropdownMenuItem>
               <DropdownMenuItem
                 render={<Link href={isAdmin ? "/system-settings" : "/account-settings"} className="flex items-center" />}

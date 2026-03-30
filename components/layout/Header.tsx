@@ -37,6 +37,7 @@ interface HeaderProps {
 export function Header({ className, children }: HeaderProps): ReactNode {
   const pathname = usePathname()
   const { user, logout, switchRole } = useAuthStore()
+  const isAdmin = user?.role === 'admin'
 
   return (
     <header className={cn(
@@ -150,10 +151,10 @@ export function Header({ className, children }: HeaderProps): ReactNode {
                 个人中心
               </DropdownMenuItem>
               <DropdownMenuItem
-                render={<Link href="/settings" className="flex items-center" />}
+                render={<Link href={isAdmin ? "/system-settings" : "/account-settings"} className="flex items-center" />}
               >
                 <Settings className="w-4 h-4 mr-2" />
-                设置
+                {isAdmin ? "系统设置" : "账号设置"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-error" onClick={logout}>

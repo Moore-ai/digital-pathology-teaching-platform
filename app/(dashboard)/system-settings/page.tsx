@@ -1,6 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
 import { FeatureToggles, UserTable } from '@/components/features/settings'
 import { mockUsers } from '@/lib/mock/users'
@@ -14,33 +16,24 @@ import {
   Users,
   FileText,
   Server,
-  Shield,
   Database,
   Activity,
 } from 'lucide-react'
 
 export default function SettingsPage(): ReactNode {
   const { user } = useAuthStore()
+  const router = useRouter()
   const isAdmin = user?.role === 'admin'
 
-  if (!isAdmin) {
-    return (
-      <PageWrapper>
-        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-          <Card className="w-full max-w-md">
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">权限不足</h3>
-              <p className="text-sm text-muted-foreground">
-                您没有访问系统设置的权限，请联系管理员。
-              </p>
-            </div>
-          </Card>
-        </div>
-      </PageWrapper>
-    )
+  // 当用户角色变化时重定向
+  useEffect(() => {
+    if (user && !isAdmin) {
+      router.replace('/account-settings')
+    }
+  }, [user, isAdmin, router])
+
+  if (!user || !isAdmin) {
+    return null
   }
 
   return (

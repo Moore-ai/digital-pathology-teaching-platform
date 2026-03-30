@@ -22,6 +22,11 @@ import {
 
 type TabValue = 'all' | 'latest' | 'hot' | 'unsolved' | 'pinned'
 
+// 辅助函数：将日期转换为时间戳（处理 Date 对象和字符串）
+function getTimestamp(date: Date | string): number {
+  return typeof date === 'string' ? new Date(date).getTime() : date.getTime()
+}
+
 export default function DiscussionsPage(): ReactNode {
   const [activeTab, setActiveTab] = useState<TabValue>('all')
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -54,7 +59,7 @@ export default function DiscussionsPage(): ReactNode {
     switch (activeTab) {
       case 'latest':
         result = [...result].sort((a, b) =>
-          b.createdAt.getTime() - a.createdAt.getTime()
+          getTimestamp(b.createdAt) - getTimestamp(a.createdAt)
         )
         break
       case 'hot':

@@ -167,7 +167,7 @@ export default function GradingPage({ params }: GradingPageProps): ReactNode {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-muted/20">
+    <div className="h-screen flex flex-col bg-muted/20">
       {/* 顶部信息栏 */}
       <header className="h-[60px] shrink-0 border-b bg-background">
         <GradingHeader

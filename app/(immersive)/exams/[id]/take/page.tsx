@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { PageWrapper } from '@/components/layout'
 import { QuestionDisplay, AnswerSheet, ExamTimer } from '@/components/features/exam'
 import { getExamById } from '@/lib/mock/exams'
 import { mockQuestions } from '@/lib/mock/questions'
@@ -94,9 +93,9 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
   }
 
   return (
-    <PageWrapper className="h-[calc(100vh-5rem)]">
+    <div className="h-screen flex flex-col">
       {/* 顶部栏 */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between px-6 py-3 border-b bg-background">
         <div className="flex items-center gap-4">
           <Link href="/exams" className="text-sm text-muted-foreground hover:text-foreground">
             ← 返回列表
@@ -113,7 +112,7 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
       </div>
 
       {/* 主内容区 */}
-      <div className="flex gap-4 h-[calc(100%-4rem)]">
+      <div className="flex-1 flex gap-4 p-4 min-h-0">
         {/* 题目区域 */}
         <div className="flex-1 flex flex-col">
           <div className="flex-1 overflow-auto">
@@ -211,6 +210,6 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </PageWrapper>
+    </div>
   )
 }

@@ -144,7 +144,7 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
         )}
       </CardContent>
 
-      <CardFooter className="mt-auto">
+      <CardFooter className="mt-auto h-14 flex items-center">
         {renderActionButton()}
       </CardFooter>
     </Card>

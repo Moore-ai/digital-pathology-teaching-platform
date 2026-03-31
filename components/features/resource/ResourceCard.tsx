@@ -30,7 +30,6 @@ interface ResourceCardProps {
   onEdit?: () => void
   onDelete?: () => void
   onDownload?: () => void
-  showActions?: boolean
   className?: string
 }
 
@@ -66,11 +65,12 @@ export function ResourceCard({
   onEdit,
   onDelete,
   onDownload,
-  showActions = true,
   className,
 }: ResourceCardProps): ReactNode {
   // 是否可以下载
   const canDownload = resource.allowDownload && onDownload
+  // 是否有操作按钮
+  const hasActions = onEdit || onDelete
 
   return (
     <Card className={cn('group overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col', className)}>
@@ -190,7 +190,7 @@ export function ResourceCard({
       </div>
 
       {/* 操作按钮（非悬停状态） */}
-      {showActions && (onEdit || onDelete) && (
+      {hasActions && (
         <div className="border-t p-2 flex items-center justify-end gap-1 shrink-0">
           {onEdit && (
             <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 px-2 text-xs">

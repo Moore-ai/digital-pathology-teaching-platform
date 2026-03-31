@@ -40,6 +40,18 @@ export default function ResourcesPage(): ReactNode {
   const canUpload = user?.role === 'teacher' || user?.role === 'admin'
   const isStudent = user?.role === 'student'
 
+  // 检查是否可以删除资源（只能删除自己上传的）
+  const canDeleteResource = useCallback((resource: Resource) => {
+    if (!canUpload) return false
+    return resource.uploadedBy === user?.id
+  }, [canUpload, user?.id])
+
+  // 检查是否可以编辑资源（只能编辑自己上传的）
+  const canEditResource = useCallback((resource: Resource) => {
+    if (!canUpload) return false
+    return resource.uploadedBy === user?.id
+  }, [canUpload, user?.id])
+
   // 筛选资料
   const filteredResources = useMemo(() => {
     let result = resources
@@ -94,6 +106,11 @@ export default function ResourcesPage(): ReactNode {
     alert(`模拟下载：${resource.fileName}\n\n实际项目中应调用后端 API 进行文件下载。`)
   }, [])
 
+  // 预览资源
+  const handleView = useCallback((resource: Resource) => {
+    window.location.href = `/resources/${resource.id}/preview`
+  }, [])
+
   return (
     <PageWrapper className="space-y-6">
       {/* 页面标题 */}
@@ -144,10 +161,10 @@ export default function ResourcesPage(): ReactNode {
             <ResourceCard
               key={resource.id}
               resource={resource}
-              showActions={canUpload}
-              onEdit={() => handleEdit(resource)}
-              onDelete={() => handleDelete(resource)}
-              onDownload={() => handleDownload(resource)}
+              onView={() => handleView(resource)}
+              onEdit={canEditResource(resource) ? () => handleEdit(resource) : undefined}
+              onDelete={canDeleteResource(resource) ? () => handleDelete(resource) : undefined}
+              onDownload={resource.allowDownload ? () => handleDownload(resource) : undefined}
             />
           ))}
         </div>

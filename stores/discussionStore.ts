@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { Discussion, DiscussionCategory } from '@/types/discussion'
 import { mockDiscussions } from '@/lib/mock/discussions'
 
@@ -53,6 +53,12 @@ export const useDiscussionStore = create<DiscussionState>()(
     }),
     {
       name: 'discussion-storage',
+      version: 2,
+      storage: createJSONStorage(() => localStorage),
+      migrate: () => {
+        // 版本升级时使用最新的 mock 数据
+        return { discussions: mockDiscussions }
+      },
     }
   )
 )

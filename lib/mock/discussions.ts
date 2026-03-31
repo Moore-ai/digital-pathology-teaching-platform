@@ -6,8 +6,8 @@ export const mockDiscussions: Discussion[] = [
     title: '肝细胞癌与胆管细胞癌如何鉴别？',
     content: '在病理诊断中，肝细胞癌和胆管细胞癌的鉴别一直是我困惑的问题。请问各位老师，除了免疫组化之外，还有哪些形态学特征可以帮助鉴别？',
     author: {
-      id: 'S001',
-      name: '李同学',
+      id: '1',
+      name: '李小明',
       avatar: '',
       role: 'student',
     },
@@ -18,8 +18,8 @@ export const mockDiscussions: Discussion[] = [
         id: 'r1',
         content: '除了免疫组化，可以关注以下几点：1. 胆汁分泌是肝细胞癌的特征；2. 胆管细胞癌常见黏液分泌；3. 肝细胞癌血窦丰富，胆管细胞癌间质纤维化明显。',
         author: {
-          id: 'T001',
-          name: '王老师',
+          id: '2',
+          name: '张教授',
           role: 'teacher',
         },
         likes: 15,
@@ -28,7 +28,7 @@ export const mockDiscussions: Discussion[] = [
       },
       {
         id: 'r2',
-        content: '同意王老师的观点。补充一点：肝细胞癌常伴肝硬化背景，而胆管细胞癌一般没有。',
+        content: '同意张教授的观点。补充一点：肝细胞癌常伴肝硬化背景，而胆管细胞癌一般没有。',
         author: {
           id: 'S002',
           name: '张同学',
@@ -83,8 +83,9 @@ export const mockDiscussions: Discussion[] = [
     title: '肺腺癌切片标注问题求助',
     content: '在浏览肺腺癌切片时，发现一个区域不太确定是肿瘤还是炎症，请老师帮忙看一下。',
     author: {
-      id: 'S002',
-      name: '张同学',
+      id: '1',
+      name: '李小明',
+      avatar: '',
       role: 'student',
     },
     category: 'help',

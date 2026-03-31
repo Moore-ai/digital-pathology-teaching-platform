@@ -96,7 +96,6 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
     items: [
       ...coreNavItems,
       { title: '讨论区', href: '/discussions', icon: MessageSquare },
-      { title: '我的提问', href: '/discussions/my', icon: User },
     ],
   },
   'system-settings': {

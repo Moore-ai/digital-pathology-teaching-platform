@@ -1,25 +1,53 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { PageWrapper } from '@/components/layout'
-import { ResourceCard, FileTypeFilter } from '@/components/features/resource'
-import { ResourceType } from '@/types/resource'
-import { mockResources, searchResources } from '@/lib/mock/resources'
+import { ResourceCard, FileTypeFilter, ResourceEditForm, ResourceFormData } from '@/components/features/resource'
+import { ResourceType, Resource } from '@/types/resource'
+import { useResourceStore } from '@/stores/resourceStore'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Search, Plus, SlidersHorizontal } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 
 export default function ResourcesPage(): ReactNode {
   const [selectedType, setSelectedType] = useState<ResourceType | 'all'>('all')
   const [searchKeyword, setSearchKeyword] = useState('')
+  const [editingResource, setEditingResource] = useState<Resource | null>(null)
+  const [deletingResource, setDeletingResource] = useState<Resource | null>(null)
+
   const { user } = useAuthStore()
+  const { resources, updateResource, deleteResource, searchResources } = useResourceStore()
+
+  const canUpload = user?.role === 'teacher' || user?.role === 'admin'
+  const isStudent = user?.role === 'student'
 
   // 筛选资料
   const filteredResources = useMemo(() => {
-    let result = mockResources
+    let result = resources
+
+    // 学生只能查看公开资料
+    if (isStudent) {
+      result = result.filter(r => r.isPublic)
+    }
 
     // 类型筛选
     if (selectedType !== 'all') {
@@ -32,9 +60,39 @@ export default function ResourcesPage(): ReactNode {
     }
 
     return result
-  }, [selectedType, searchKeyword])
+  }, [selectedType, searchKeyword, resources, searchResources, isStudent])
 
-  const canUpload = user?.role === 'teacher' || user?.role === 'admin'
+  // 编辑资源
+  const handleEdit = useCallback((resource: Resource) => {
+    setEditingResource(resource)
+  }, [])
+
+  // 保存编辑
+  const handleSaveEdit = useCallback((data: ResourceFormData) => {
+    if (editingResource) {
+      updateResource(editingResource.id, data)
+      setEditingResource(null)
+    }
+  }, [editingResource, updateResource])
+
+  // 删除资源
+  const handleDelete = useCallback((resource: Resource) => {
+    setDeletingResource(resource)
+  }, [])
+
+  // 确认删除
+  const handleConfirmDelete = useCallback(() => {
+    if (deletingResource) {
+      deleteResource(deletingResource.id)
+      setDeletingResource(null)
+    }
+  }, [deletingResource, deleteResource])
+
+  // 下载资源
+  const handleDownload = useCallback((resource: Resource) => {
+    // 前端原型：模拟下载
+    alert(`模拟下载：${resource.fileName}\n\n实际项目中应调用后端 API 进行文件下载。`)
+  }, [])
 
   return (
     <PageWrapper className="space-y-6">
@@ -87,6 +145,9 @@ export default function ResourcesPage(): ReactNode {
               key={resource.id}
               resource={resource}
               showActions={canUpload}
+              onEdit={() => handleEdit(resource)}
+              onDelete={() => handleDelete(resource)}
+              onDownload={() => handleDownload(resource)}
             />
           ))}
         </div>
@@ -101,6 +162,40 @@ export default function ResourcesPage(): ReactNode {
           </p>
         </div>
       )}
+
+      {/* 编辑对话框 */}
+      <Dialog open={!!editingResource} onOpenChange={(open) => !open && setEditingResource(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>编辑资料详情</DialogTitle>
+          </DialogHeader>
+          {editingResource && (
+            <ResourceEditForm
+              resource={editingResource}
+              onSave={handleSaveEdit}
+              onCancel={() => setEditingResource(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认对话框 */}
+      <AlertDialog open={!!deletingResource} onOpenChange={(open) => !open && setDeletingResource(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除资料「{deletingResource?.title}」吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-error text-white hover:bg-error/90">
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageWrapper>
   )
 }

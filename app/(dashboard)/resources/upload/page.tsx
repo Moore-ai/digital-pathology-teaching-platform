@@ -5,7 +5,9 @@ import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { PageWrapper } from '@/components/layout'
 import { FileUploadZone, UploadQueueList, ResourceEditForm, ResourceFormData } from '@/components/features/resource'
-import { UploadFile } from '@/types/resource'
+import { UploadFile, ResourceType } from '@/types/resource'
+import { useResourceStore } from '@/stores/resourceStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
@@ -14,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ArrowLeft, Upload as UploadIcon } from 'lucide-react'
+import { detectFileType } from '@/lib/mock/resources'
 
 // 生成唯一ID
 function generateId(): string {
@@ -24,6 +27,10 @@ export default function ResourceUploadPage(): ReactNode {
   const [uploadQueue, setUploadQueue] = useState<UploadFile[]>([])
   const [editingFile, setEditingFile] = useState<UploadFile | null>(null)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [pendingResourceData, setPendingResourceData] = useState<Map<string, ResourceFormData>>(new Map())
+
+  const { addResource, updateResource } = useResourceStore()
+  const { user } = useAuthStore()
 
   // 处理文件选择
   const handleFilesSelect = useCallback((files: File[]) => {
@@ -58,11 +65,44 @@ export default function ResourceUploadPage(): ReactNode {
 
         // 模拟处理完成
         setTimeout(() => {
+          // 先获取上传项信息，再更新状态
+          let uploadItem: UploadFile | undefined
+          setUploadQueue(prev => {
+            uploadItem = prev.find(item => item.id === id)
+            return prev
+          })
+
+          if (!uploadItem) return
+
+          // 获取文件类型
+          const fileType = detectFileType(uploadItem.file.name) as ResourceType || 'pdf'
+
+          // 检查是否有编辑过的元数据
+          const savedData = pendingResourceData.get(id)
+
+          // 创建资源（在 setState 回调外部调用）
+          const newResource = addResource({
+            title: savedData?.title || uploadItem.file.name.replace(/\.[^/.]+$/, ''),
+            description: savedData?.description || '',
+            type: fileType,
+            category: savedData?.category || 'other',
+            tags: savedData?.tags || [],
+            fileName: uploadItem.file.name,
+            filePath: `/uploads/${fileType}/${Date.now()}/${uploadItem.file.name}`,
+            fileSize: uploadItem.file.size,
+            mimeType: uploadItem.file.type || 'application/octet-stream',
+            relatedCourses: [],
+            isPublic: savedData?.isPublic ?? true,
+            allowDownload: savedData?.allowDownload ?? false,
+            uploadedBy: user?.id || 'unknown',
+          })
+
+          // 更新上传队列状态
           setUploadQueue(prev => prev.map(item =>
             item.id === id ? {
               ...item,
               status: 'success' as const,
-              resourceId: generateId(),
+              resourceId: newResource.id,
             } : item
           ))
         }, 1000)
@@ -77,7 +117,7 @@ export default function ResourceUploadPage(): ReactNode {
         ))
       }
     }, 200)
-  }, [])
+  }, [addResource, user?.id, pendingResourceData])
 
   // 全部上传
   const handleUploadAll = useCallback(() => {
@@ -114,10 +154,30 @@ export default function ResourceUploadPage(): ReactNode {
 
   // 保存编辑
   const handleSaveEdit = useCallback((data: ResourceFormData) => {
-    console.log('保存资料元数据:', { fileId: editingFile?.id, ...data })
+    if (!editingFile) return
+
+    // 如果资源已创建（上传成功），则更新资源
+    if (editingFile.resourceId) {
+      updateResource(editingFile.resourceId, {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        tags: data.tags,
+        isPublic: data.isPublic,
+        allowDownload: data.allowDownload,
+      })
+    } else {
+      // 如果资源未创建，暂存元数据
+      setPendingResourceData(prev => {
+        const newMap = new Map(prev)
+        newMap.set(editingFile.id, data)
+        return newMap
+      })
+    }
+
     setShowEditDialog(false)
     setEditingFile(null)
-  }, [editingFile])
+  }, [editingFile, updateResource])
 
   // 清空队列
   const handleClearAll = useCallback(() => {

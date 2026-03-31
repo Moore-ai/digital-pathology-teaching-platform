@@ -17,6 +17,8 @@ import {
   Calendar,
   Clock,
   File,
+  Globe,
+  Lock,
 } from 'lucide-react'
 import { Resource, ResourceType, categoryLabels } from '@/types/resource'
 import { formatFileSize, formatDuration } from '@/lib/mock/resources'
@@ -27,6 +29,7 @@ interface ResourceCardProps {
   onView?: () => void
   onEdit?: () => void
   onDelete?: () => void
+  onDownload?: () => void
   showActions?: boolean
   className?: string
 }
@@ -62,9 +65,13 @@ export function ResourceCard({
   onView,
   onEdit,
   onDelete,
+  onDownload,
   showActions = true,
   className,
 }: ResourceCardProps): ReactNode {
+  // 是否可以下载
+  const canDownload = resource.allowDownload && onDownload
+
   return (
     <Card className={cn('group overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col', className)}>
       {/* 缩略图区域 */}
@@ -107,22 +114,20 @@ export function ResourceCard({
         )}
 
         {/* 悬停操作 */}
-        {showActions && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-            {onView && (
-              <Button size="sm" variant="secondary" onClick={onView} className="gap-1">
-                <Eye className="w-4 h-4" />
-                查看
-              </Button>
-            )}
-            {resource.allowDownload && (
-              <Button size="sm" variant="secondary" className="gap-1">
-                <Download className="w-4 h-4" />
-                下载
-              </Button>
-            )}
-          </div>
-        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+          {onView && (
+            <Button size="sm" variant="secondary" onClick={onView} className="gap-1">
+              <Eye className="w-4 h-4" />
+              查看
+            </Button>
+          )}
+          {canDownload && (
+            <Button size="sm" variant="secondary" onClick={onDownload} className="gap-1">
+              <Download className="w-4 h-4" />
+              下载
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* 内容区域 */}
@@ -155,9 +160,31 @@ export function ResourceCard({
             <Calendar className="w-3 h-3" />
             {formatDate(resource.uploadedAt)}
           </div>
-          <div className="ml-auto flex items-center gap-1">
-            <File className="w-3 h-3" />
-            {formatFileSize(resource.fileSize)}
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            {/* 公开/私密状态 */}
+            {resource.isPublic ? (
+              <span className="flex items-center gap-0.5 text-success" title="公开资料">
+                <Globe className="w-3 h-3" />
+                <span className="hidden sm:inline">公开</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-0.5 text-warning" title="私密资料">
+                <Lock className="w-3 h-3" />
+                <span className="hidden sm:inline">私密</span>
+              </span>
+            )}
+            {/* 文件大小 */}
+            <span className="flex items-center gap-0.5">
+              <File className="w-3 h-3" />
+              {formatFileSize(resource.fileSize)}
+            </span>
+            {/* 允许下载 */}
+            {resource.allowDownload && (
+              <span className="flex items-center gap-0.5 text-secondary" title="允许下载">
+                <Download className="w-3 h-3" />
+              </span>
+            )}
           </div>
         </CardFooter>
       </div>

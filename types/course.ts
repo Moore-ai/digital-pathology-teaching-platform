@@ -45,9 +45,35 @@ export interface Lesson {
   videoUrl?: string;
   fileUrl?: string;
   completed: boolean;
+  // 课件相关
+  courseware?: Courseware;
+  coursewareSlides?: CoursewareSlide[];
 }
 
 export type LessonType = 'video' | 'pdf' | 'ppt';
+
+/** 课件文件 */
+export interface Courseware {
+  id: string;
+  title: string;
+  type: CoursewareType;
+  fileUrl: string;
+  totalPages: number;
+  fileSize: number;
+  uploadedAt: Date;
+}
+
+export type CoursewareType = 'ppt' | 'pptx' | 'pdf';
+
+/** 课时节片标注 */
+export interface CoursewareSlide {
+  id: string;
+  slideIndex: number;        // 幻灯片索引 (0-based)
+  thumbnailUrl: string;      // 缩略图URL
+  imageUrl: string;          // 大图URL
+  notes?: string;            // 讲师备注
+  videoTimestamp?: number;   // 对应视频时间点（秒）
+}
 
 export interface Instructor {
   id: string;

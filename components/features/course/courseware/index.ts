@@ -1,0 +1,5 @@
+export { CoursewareViewer } from './CoursewareViewer'
+export { SlideThumbnailBar } from './SlideThumbnailBar'
+export { SlideViewer } from './SlideViewer'
+export { SlideControls } from './SlideControls'
+export { CoursewareHeader } from './CoursewareHeader'

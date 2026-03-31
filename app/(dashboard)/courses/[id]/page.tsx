@@ -104,7 +104,7 @@ export default function CoursePage({ params }: CoursePageProps): ReactNode {
           {/* 播放器 */}
           {currentLesson && (
             <>
-              <CoursePlayer lesson={currentLesson} />
+              <CoursePlayer lesson={currentLesson} courseId={course.id} />
 
               {/* 课时信息 */}
               <div className="flex items-center justify-between">

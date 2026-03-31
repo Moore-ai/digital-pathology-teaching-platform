@@ -125,7 +125,7 @@ export default function LessonPage({ params }: LessonPageProps): ReactNode {
         {/* 播放器区域 */}
         <div className="lg:col-span-2 space-y-4">
           {/* 播放器 */}
-          <CoursePlayer lesson={currentLesson} />
+          <CoursePlayer lesson={currentLesson} courseId={course.id} />
 
           {/* 课时导航 */}
           <div className="flex items-center justify-between">

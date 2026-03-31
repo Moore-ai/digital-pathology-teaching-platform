@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useState } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Lesson } from '@/types/course'
 import { Button } from '@/components/ui/button'
@@ -14,14 +15,16 @@ import {
   Maximize,
   Settings,
   FileText,
+  Presentation,
 } from 'lucide-react'
 
 interface CoursePlayerProps {
   className?: string
   lesson: Lesson
+  courseId: string
 }
 
-export function CoursePlayer({ className, lesson }: CoursePlayerProps): ReactNode {
+export function CoursePlayer({ className, lesson, courseId }: CoursePlayerProps): ReactNode {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -179,6 +182,29 @@ export function CoursePlayer({ className, lesson }: CoursePlayerProps): ReactNod
             </div>
 
             <div className="flex items-center gap-2">
+              {/* 查看课件按钮 */}
+              {lesson.courseware ? (
+                <Link href={`/courses/${courseId}/${lesson.id}/courseware`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 gap-1.5"
+                  >
+                    <Presentation className="w-4 h-4" />
+                    <span className="hidden sm:inline">课件</span>
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/50 gap-1.5 cursor-not-allowed"
+                  disabled
+                >
+                  <Presentation className="w-4 h-4" />
+                  <span className="hidden sm:inline">无课件</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"

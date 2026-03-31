@@ -13,6 +13,8 @@ import {
   User,
   LucideIcon,
   GraduationCap,
+  FolderOpen,
+  Upload,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -35,6 +37,7 @@ export const mainNavigation: NavItem[] = [
   { title: '首页', href: '/', icon: Home },
   { title: '课程中心', href: '/courses', icon: BookOpen },
   { title: '切片库', href: '/slices', icon: Microscope },
+  { title: '病例资料', href: '/resources', icon: FolderOpen },
   { title: '考试中心', href: '/exams', icon: ClipboardList },
   { title: '讨论', href: '/discussions', icon: MessageSquare },
 ]
@@ -89,6 +92,14 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
       { title: '考试中心', href: '/exams', icon: ClipboardList },
       { title: '智能组卷', href: '/exams/create', icon: PlusCircle, roles: ['teacher', 'admin'] },
       { title: '成绩查询', href: '/exams/results', icon: BarChart3 },
+    ],
+  },
+  resources: {
+    title: '病例资料',
+    items: [
+      ...coreNavItems,
+      { title: '资料管理', href: '/resources', icon: FolderOpen },
+      { title: '上传资料', href: '/resources/upload', icon: Upload, roles: ['teacher', 'admin'] },
     ],
   },
   discussions: {

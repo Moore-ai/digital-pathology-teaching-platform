@@ -22,6 +22,7 @@ import {
   Eye,
   Edit,
   CheckCircle,
+  FileCheck,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
 
@@ -61,6 +62,16 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
             </Button>
           </Link>
         )
+      case 'completed':
+        // 教师/管理员显示批改按钮
+        return userRole !== 'student' ? (
+          <Link href={`/exams/${exam.id}/grading`}>
+            <Button className="gap-2">
+              <FileCheck className="w-4 h-4" />
+              批改
+            </Button>
+          </Link>
+        ) : null
       case 'graded':
         return (
           <Link href={`/exams/${exam.id}/result`}>

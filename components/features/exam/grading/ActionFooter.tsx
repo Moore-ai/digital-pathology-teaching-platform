@@ -16,7 +16,6 @@ interface ActionFooterProps {
 
 export function ActionFooter({
   hasPrevious,
-  hasNext,
   onPrevious,
   onSave,
   onSaveAndNext,

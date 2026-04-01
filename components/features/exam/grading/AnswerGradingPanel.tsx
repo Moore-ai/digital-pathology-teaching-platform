@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
@@ -57,7 +57,7 @@ export function AnswerGradingPanel({
   return (
     <div className={cn('h-full flex flex-col', className)}>
       {/* 题目信息头部 */}
-      <div className="flex items-center justify-between mb-3 flex-shrink-0">
+      <div className="flex items-center justify-between mb-3 shrink-0">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-semibold text-foreground">
             第 {question.index} 题
@@ -83,7 +83,7 @@ export function AnswerGradingPanel({
         {/* 左侧：题目和答案 */}
         <div className="flex-1 flex flex-col gap-3 min-w-0 overflow-y-auto">
           {/* 题目内容 */}
-          <Card className="flex-shrink-0">
+          <Card className="shrink-0">
             <CardContent className="py-3">
               <p className="text-foreground whitespace-pre-wrap text-sm">{question.content}</p>
               {question.relatedSlices && question.relatedSlices.length > 0 && (
@@ -106,7 +106,7 @@ export function AnswerGradingPanel({
           </Card>
 
           {/* 参考答案（可折叠） */}
-          <Card className="flex-shrink-0">
+          <Card className="shrink-0">
             <button
               onClick={() => setShowReference(!showReference)}
               className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
@@ -170,7 +170,7 @@ export function AnswerGradingPanel({
           </Card>
 
           {/* 学生答案 */}
-          <Card className="flex-shrink-0">
+          <Card className="shrink-0">
             <CardContent className="py-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">学生答案</span>
@@ -255,7 +255,7 @@ export function AnswerGradingPanel({
           )}
 
           {/* 导航按钮 */}
-          <div className="flex items-center justify-between gap-2 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2 shrink-0">
             <Button
               variant="outline"
               size="sm"

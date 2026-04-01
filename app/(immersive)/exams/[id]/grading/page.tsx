@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { use, useState, useMemo, useCallback, useEffect } from 'react'
+import { use, useState, useMemo, useCallback } from 'react'
 import { notFound } from 'next/navigation'
 import { getExamById } from '@/lib/mock/exams'
 import {
@@ -9,7 +9,6 @@ import {
   getQuestionGradingStatus,
   getGradingQuestion,
   getStudentAnswer,
-  QuestionGradingStatus,
 } from '@/lib/mock/grading'
 import {
   GradingHeader,
@@ -99,11 +98,6 @@ export default function GradingPage({ params }: GradingPageProps): ReactNode {
     return sessionData.comments[key] ?? ''
   }, [currentQuestion, sessionData.comments, currentStudentId])
 
-  // 统计已批改学生数
-  const gradedCount = useMemo(() => {
-    return students.filter(s => s.status === 'graded').length
-  }, [students])
-
   // 更新分数
   const handleScoreChange = useCallback((score: number) => {
     if (!currentQuestion || !currentStudentId) return
@@ -169,7 +163,7 @@ export default function GradingPage({ params }: GradingPageProps): ReactNode {
   return (
     <div className="h-screen flex flex-col bg-muted/20">
       {/* 顶部信息栏 */}
-      <header className="h-[60px] shrink-0 border-b bg-background">
+      <header className="h-15 shrink-0 border-b bg-background">
         <GradingHeader
           examTitle={exam.title}
           currentIndex={currentStudentIndex + 1}
@@ -210,7 +204,7 @@ export default function GradingPage({ params }: GradingPageProps): ReactNode {
       </main>
 
       {/* 题目导航栏 */}
-      <nav className="h-[48px] shrink-0 border-t bg-muted/30">
+      <nav className="h-12 shrink-0 border-t bg-muted/30">
         <QuestionNavBar
           questions={questionStatus}
           currentIndex={currentQuestionOriginalIndex}
@@ -219,7 +213,7 @@ export default function GradingPage({ params }: GradingPageProps): ReactNode {
       </nav>
 
       {/* 底部操作栏 */}
-      <footer className="h-[56px] shrink-0 border-t bg-background">
+      <footer className="h-14 shrink-0 border-t bg-background">
         <ActionFooter
           hasPrevious={currentStudentIndex > 0}
           hasNext={currentStudentIndex < students.length - 1}

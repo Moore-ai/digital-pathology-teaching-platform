@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Circle, MinusCircle } from 'lucide-react'
+import { CheckCircle, Circle } from 'lucide-react'
 import { QuestionGradingStatus } from '@/lib/mock/grading'
 
 interface QuestionNavBarProps {
@@ -23,17 +23,12 @@ export function QuestionNavBar({
   const subjectiveQuestions = questions.filter(q => q.isSubjective)
   const objectiveCount = questions.filter(q => !q.isSubjective).length
 
-  // 计算当前主观题的实际索引
-  const currentSubjectiveIndex = subjectiveQuestions.findIndex(
-    (q, idx) => q.index === questions[currentIndex]?.index
-  )
-
   return (
     <div className={cn('flex items-center justify-between h-full px-6', className)}>
       {/* 题目导航按钮 */}
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground mr-2">题目导航</span>
-        {subjectiveQuestions.map((question, index) => {
+        {subjectiveQuestions.map((question) => {
           const isCurrent = question.index === questions[currentIndex]?.index
           const isGraded = question.isGraded
 

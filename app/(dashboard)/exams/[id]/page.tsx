@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
 import { getExamById } from '@/lib/mock/exams'
+import { useExamStore } from '@/stores/examStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +21,10 @@ import {
   Play,
   Eye,
   Users,
+  Edit,
+  Send,
+  Trash2,
+  ClipboardCheck,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
 
@@ -36,13 +42,160 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNode {
   const { id } = use(params)
-  const exam = getExamById(id)
+  const { exams: createdExams } = useExamStore()
+  const { user } = useAuthStore()
+
+  // 先从store中查找，再从mock数据中查找
+  const exam = createdExams.find(e => e.id === id) || getExamById(id)
 
   if (!exam) {
     notFound()
   }
 
   const status = statusConfig[exam.status]
+  const isTeacher = user?.role === 'teacher' || user?.role === 'admin'
+  const isStudent = user?.role === 'student'
+
+  // 根据角色和考试状态渲染操作按钮
+  const renderActionButtons = () => {
+    if (isStudent) {
+      // 学生操作
+      if (exam.status === 'published' || exam.status === 'ongoing') {
+        return (
+          <Link href={`/exams/${exam.id}/take`}>
+            <Button className="gap-2">
+              <Play className="w-4 h-4" />
+              开始考试
+            </Button>
+          </Link>
+        )
+      }
+      if (exam.status === 'graded') {
+        return (
+          <Link href={`/exams/${exam.id}/result`}>
+            <Button className="gap-2">
+              <Eye className="w-4 h-4" />
+              查看成绩
+            </Button>
+          </Link>
+        )
+      }
+      return <Button disabled>暂不可参加</Button>
+    }
+
+    if (isTeacher) {
+      // 教师/管理员操作
+      if (exam.status === 'draft') {
+        return (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              <Edit className="w-4 h-4" />
+              编辑试卷
+            </Button>
+            <Button className="gap-2">
+              <Send className="w-4 h-4" />
+              发布考试
+            </Button>
+            <Button variant="destructive" className="gap-2">
+              <Trash2 className="w-4 h-4" />
+              删除
+            </Button>
+          </div>
+        )
+      }
+      if (exam.status === 'published') {
+        return (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              <Eye className="w-4 h-4" />
+              预览试卷
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <Edit className="w-4 h-4" />
+              编辑
+            </Button>
+          </div>
+        )
+      }
+      if (exam.status === 'ongoing') {
+        return (
+          <div className="flex items-center gap-2">
+            <Link href={`/exams/${exam.id}/grading`}>
+              <Button variant="outline" className="gap-2">
+                <Users className="w-4 h-4" />
+                查看答题情况
+              </Button>
+            </Link>
+            <Button variant="outline" className="gap-2">
+              <Eye className="w-4 h-4" />
+              预览试卷
+            </Button>
+          </div>
+        )
+      }
+      if (exam.status === 'completed') {
+        return (
+          <div className="flex items-center gap-2">
+            <Link href={`/exams/${exam.id}/grading`}>
+              <Button className="gap-2">
+                <ClipboardCheck className="w-4 h-4" />
+                批改试卷
+              </Button>
+            </Link>
+            <Button variant="outline" className="gap-2">
+              <Users className="w-4 h-4" />
+              查看提交情况
+            </Button>
+          </div>
+        )
+      }
+      if (exam.status === 'graded') {
+        return (
+          <div className="flex items-center gap-2">
+            <Link href={`/exams/${exam.id}/result`}>
+              <Button className="gap-2">
+                <Eye className="w-4 h-4" />
+                查看统计
+              </Button>
+            </Link>
+            <Button variant="outline" className="gap-2">
+              <FileText className="w-4 h-4" />
+              导出成绩
+            </Button>
+          </div>
+        )
+      }
+    }
+
+    return null
+  }
+
+  // 根据角色显示不同的提示文本
+  const getStatusHint = () => {
+    if (isStudent) {
+      switch (exam.status) {
+        case 'published': return '考试尚未开始，请在规定时间内参加'
+        case 'ongoing': return '考试进行中，点击开始答题'
+        case 'completed': return '考试已结束，等待批改'
+        case 'graded': return '考试已批改，可查看成绩'
+        case 'draft': return '考试尚未发布'
+        default: return ''
+      }
+    }
+
+    if (isTeacher) {
+      switch (exam.status) {
+        case 'draft': return '考试仍在编辑中，可以修改或发布'
+        case 'published': return '考试已发布，等待学生参加'
+        case 'ongoing': return '考试进行中，可以查看答题情况'
+        case 'completed': return '考试已结束，可以开始批改'
+        case 'graded': return '考试已批改完成，可以查看统计和导出成绩'
+        default: return ''
+      }
+    }
+
+    return ''
+  }
 
   return (
     <PageWrapper className="space-y-6">
@@ -105,33 +258,13 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
         <CardContent className="py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-medium text-foreground">准备好了吗？</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {exam.status === 'published' && '考试尚未开始，请在规定时间内参加'}
-                {exam.status === 'ongoing' && '考试进行中，点击开始答题'}
-                {exam.status === 'completed' && '考试已结束，等待批改'}
-                {exam.status === 'graded' && '考试已批改，可查看成绩'}
-                {exam.status === 'draft' && '考试尚未发布'}
-              </p>
+              <h3 className="text-lg font-medium text-foreground">
+                {isStudent ? '准备好了吗？' : '考试管理'}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">{getStatusHint()}</p>
             </div>
             <div className="flex items-center gap-2">
-              {exam.status === 'published' || exam.status === 'ongoing' ? (
-                <Link href={`/exams/${exam.id}/take`}>
-                  <Button className="gap-2">
-                    <Play className="w-4 h-4" />
-                    开始考试
-                  </Button>
-                </Link>
-              ) : exam.status === 'graded' ? (
-                <Link href={`/exams/${exam.id}/result`}>
-                  <Button className="gap-2">
-                    <Eye className="w-4 h-4" />
-                    查看成绩
-                  </Button>
-                </Link>
-              ) : (
-                <Button disabled>暂不可参加</Button>
-              )}
+              {renderActionButtons()}
             </div>
           </div>
         </CardContent>

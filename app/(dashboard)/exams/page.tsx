@@ -5,42 +5,49 @@ import { useState, useMemo } from 'react'
 import { PageWrapper } from '@/components/layout'
 import { ExamCard } from '@/components/features/exam'
 import { mockExams } from '@/lib/mock/exams'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, FileText } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { useExamStore } from '@/stores/examStore'
 
 type TabValue = 'all' | 'pending' | 'ongoing' | 'completed' | 'draft'
 
 export default function ExamsPage(): ReactNode {
   const [activeTab, setActiveTab] = useState<TabValue>('all')
   const { user } = useAuthStore()
+  const { getExams } = useExamStore()
+
+  // 合并mock数据和新创建的考试
+  const allExams = useMemo(() => {
+    const storedExams = getExams()
+    return [...storedExams, ...mockExams]
+  }, [getExams])
 
   // 筛选考试
   const filteredExams = useMemo(() => {
     switch (activeTab) {
       case 'pending':
-        return mockExams.filter(e => e.status === 'published')
+        return allExams.filter(e => e.status === 'published')
       case 'ongoing':
-        return mockExams.filter(e => e.status === 'ongoing')
+        return allExams.filter(e => e.status === 'ongoing')
       case 'completed':
-        return mockExams.filter(e => e.status === 'graded' || e.status === 'completed')
+        return allExams.filter(e => e.status === 'graded' || e.status === 'completed')
       case 'draft':
-        return mockExams.filter(e => e.status === 'draft')
+        return allExams.filter(e => e.status === 'draft')
       default:
-        return mockExams
+        return allExams
     }
-  }, [activeTab])
+  }, [activeTab, allExams])
 
   // 统计数量
   const counts = useMemo(() => ({
-    all: mockExams.length,
-    pending: mockExams.filter(e => e.status === 'published').length,
-    ongoing: mockExams.filter(e => e.status === 'ongoing').length,
-    completed: mockExams.filter(e => e.status === 'graded' || e.status === 'completed').length,
-    draft: mockExams.filter(e => e.status === 'draft').length,
-  }), [])
+    all: allExams.length,
+    pending: allExams.filter(e => e.status === 'published').length,
+    ongoing: allExams.filter(e => e.status === 'ongoing').length,
+    completed: allExams.filter(e => e.status === 'graded' || e.status === 'completed').length,
+    draft: allExams.filter(e => e.status === 'draft').length,
+  }), [allExams])
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin'
 
@@ -54,12 +61,6 @@ export default function ExamsPage(): ReactNode {
             {isTeacher ? '管理考试、创建试卷、批改答卷' : '参加考试、查看成绩、复习错题'}
           </p>
         </div>
-        {isTeacher && (
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            创建考试
-          </Button>
-        )}
       </div>
 
       {/* 标签页 */}

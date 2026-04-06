@@ -2,9 +2,14 @@
 
 import type { ReactNode } from 'react'
 import { useEffect, useState, useRef } from 'react'
-import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import {
+  Box,
+  Paper,
+  Typography,
+  Stack,
+  Chip,
+  Skeleton,
+} from '@mui/material'
 import {
   LineChart,
   Line,
@@ -15,7 +20,6 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
-import { Skeleton } from '@/components/ui/skeleton'
 
 interface ExamScoreChartProps {
   className?: string
@@ -52,7 +56,6 @@ function ChartContainer({
       }
     }
 
-    // 初始测量
     updateDimensions()
 
     const observer = new ResizeObserver(() => {
@@ -64,15 +67,15 @@ function ChartContainer({
   }, [])
 
   return (
-    <div ref={containerRef} className={className}>
+    <Box ref={containerRef} className={className}>
       {dimensions ? (
         <ResponsiveContainer width={dimensions.width} height={dimensions.height}>
           {children}
         </ResponsiveContainer>
       ) : (
-        <Skeleton className="w-full h-full" />
+        <Skeleton variant="rectangular" width="100%" height="100%" />
       )}
-    </div>
+    </Box>
   )
 }
 
@@ -82,44 +85,69 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
   const improvement = latestScore - firstScore
 
   return (
-    <Card className={cn("", className)}>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-base font-medium">考试成绩趋势</CardTitle>
-            <CardDescription>个人成绩与班级平均对比</CardDescription>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-primary">{latestScore}</div>
-            <div className="flex items-center gap-1">
+    <Paper
+      className={className}
+      sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}
+    >
+      <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+              考试成绩趋势
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
+              个人成绩与班级平均对比
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--primary)' }}>
+              {latestScore}
+            </Typography>
+            <Box sx={{ mt: 0.5 }}>
               {improvement > 0 ? (
-                <>
-                  <Badge className="bg-success/10 text-success">↑ {improvement} 分</Badge>
-                </>
+                <Chip
+                  size="small"
+                  label={`↑ ${improvement} 分`}
+                  sx={{
+                    height: 24,
+                    bgcolor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+                    color: 'var(--success)',
+                    '& .MuiChip-label': { color: 'var(--success)' },
+                  }}
+                />
               ) : (
-                <Badge className="bg-destructive/10 text-destructive">↓ {Math.abs(improvement)} 分</Badge>
+                <Chip
+                  size="small"
+                  label={`↓ ${Math.abs(improvement)} 分`}
+                  sx={{
+                    height: 24,
+                    bgcolor: 'color-mix(in srgb, var(--error) 10%, transparent)',
+                    color: 'var(--error)',
+                    '& .MuiChip-label': { color: 'var(--error)' },
+                  }}
+                />
               )}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
+            </Box>
+          </Box>
+        </Stack>
+      </Box>
+      <Box sx={{ p: 2 }}>
         <ChartContainer className="h-72 w-full">
           <LineChart data={examScoreData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis
               dataKey="name"
               tick={{ fontSize: 12 }}
-              stroke="#6B7280"
+              stroke="var(--muted-foreground)"
             />
             <YAxis
               domain={[60, 100]}
               tick={{ fontSize: 12 }}
-              stroke="#6B7280"
+              stroke="var(--muted-foreground)"
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1E3A5F',
+                backgroundColor: 'var(--primary)',
                 border: 'none',
                 borderRadius: '8px',
                 color: '#fff',
@@ -127,14 +155,14 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
             />
             <ReferenceLine
               y={80}
-              stroke="#E86A33"
+              stroke="var(--accent)"
               strokeDasharray="5 5"
-              label={{ value: '优秀线', fill: '#E86A33', fontSize: 10 }}
+              label={{ value: '优秀线', fill: 'var(--accent)', fontSize: 10 }}
             />
             <Line
               type="monotone"
               dataKey="average"
-              stroke="#9CA3AF"
+              stroke="var(--muted-foreground)"
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
@@ -143,9 +171,9 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
             <Line
               type="monotone"
               dataKey="score"
-              stroke="#2D8B8B"
+              stroke="var(--secondary)"
               strokeWidth={3}
-              dot={{ fill: '#2D8B8B', strokeWidth: 2, r: 4 }}
+              dot={{ fill: 'var(--secondary)', strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6 }}
               name="我的成绩"
             />
@@ -153,17 +181,21 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
         </ChartContainer>
 
         {/* 图例 */}
-        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-0.5 bg-secondary" />
-            <span className="text-muted-foreground">我的成绩</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 border-t-2 border-gray-300 border-dashed" />
-            <span className="text-muted-foreground">班级平均</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={3} sx={{ mt: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 16, height: 2, bgcolor: 'var(--secondary)' }} />
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              我的成绩
+            </Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 16, height: 0, borderTop: '2px dashed', borderColor: 'var(--muted-foreground)' }} />
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              班级平均
+            </Typography>
+          </Stack>
+        </Stack>
+      </Box>
+    </Paper>
   )
 }

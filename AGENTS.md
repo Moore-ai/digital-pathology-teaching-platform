@@ -52,6 +52,8 @@
 
 ### 3.1 色彩系统
 
+本项目使用 **CSS 变量** 实现主题切换，支持浅色/深色模式。
+
 ```css
 /* 主色调 */
 --color-primary: #1E3A5F;        /* 临床蓝 - 主色 */
@@ -72,6 +74,70 @@
 --color-dark-card: #1E293B;
 --color-dark-text: #E2E8F0;
 --color-dark-accent: #38BDF8;
+```
+
+### 3.1.1 主题系统实现
+
+使用 `next-themes` 实现主题切换，在 `app/layout.tsx` 中配置：
+
+```tsx
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+<NextThemesProvider
+  attribute="class"
+  defaultTheme="system"
+  enableSystem
+  disableTransitionOnChange
+>
+  {children}
+</NextThemesProvider>
+```
+
+### 3.1.2 CSS 变量使用规范
+
+**推荐使用的 CSS 变量：**
+
+| 变量 | 用途 | 深色模式值 |
+|------|------|-----------|
+| `var(--foreground)` | 主要文字 | 浅色/白色 |
+| `var(--muted-foreground)` | 次要文字 | 浅灰色 |
+| `var(--card)` | 卡片背景 | 深色卡片 |
+| `var(--primary)` | 主色调 | 保持品牌色 |
+| `var(--secondary)` | 次要色 | 保持品牌色 |
+| `var(--border)` | 边框 | 深色边框 |
+| `var(--background)` | 页面背景 | 深色背景 |
+
+**半透明背景实现：**
+
+```tsx
+// 使用 color-mix 实现动态半透明背景
+bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)'
+```
+
+### 3.1.3 MUI 组件深色模式适配
+
+MUI 组件默认不支持 CSS 变量主题，需要手动适配：
+
+```tsx
+// 正确示例：使用 CSS 变量
+<Typography sx={{ color: 'var(--foreground)' }}>文字</Typography>
+<Paper sx={{ bgcolor: 'var(--card)', borderColor: 'var(--border)' }}>
+
+// 错误示例：硬编码颜色（深色模式下不可见）
+<Typography sx={{ color: '#374151' }}>文字</Typography>
+
+// Chip 组件需要显式设置 label 颜色
+<Chip
+  label={<span style={{ color: 'var(--foreground)' }}>标签</span>}
+  sx={{ bgcolor: 'var(--muted)', borderColor: 'var(--border)' }}
+/>
+```
+
+**图标颜色：**
+
+```tsx
+// 使用 style 属性设置图标颜色
+<Icon className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
 ```
 
 ### 3.2 字体系统
@@ -170,36 +236,118 @@
 
 ---
 
-## 七、组件开发规范
+## 七、项目结构详解
 
-### 7.1 组件原则
+### 7.1 目录结构总览
+
+```
+digital-pathology-teaching-platform/
+├── app/                          # Next.js App Router 页面
+│   ├── (auth)/                   # 认证路由组
+│   │   └── login/                # 登录页
+│   ├── (dashboard)/              # 仪表盘路由组（含侧边栏布局）
+│   │   ├── analysis/             # 智能分析模块
+│   │   │   ├── assistant/        # AI问答助手
+│   │   │   ├── errors/           # 错题诊断
+│   │   │   ├── exam/[id]/        # 考试分析详情
+│   │   │   └── knowledge/        # 知识点分析
+│   │   ├── courses/              # 课程模块
+│   │   │   └── [id]/[lessonId]/  # 课程详情/课时
+│   │   │       └── courseware/   # 课件播放
+│   │   ├── discussions/          # 讨论交流
+│   │   ├── exams/                # 考试模块
+│   │   │   ├── [id]/             # 考试详情
+│   │   │   │   └── result/       # 考试结果
+│   │   │   ├── create/           # 智能组卷
+│   │   │   └── results/          # 成绩管理
+│   │   ├── my-learning/          # 我的学习
+│   │   ├── profile/              # 个人中心
+│   │   ├── progress/             # 学习进度
+│   │   ├── resources/            # 资源管理
+│   │   │   ├── [id]/preview/     # 资源预览
+│   │   │   └── upload/           # 资源上传
+│   │   ├── slices/               # 切片管理
+│   │   │   ├── [id]/             # 切片浏览
+│   │   │   └── upload/           # 切片上传
+│   │   └── system-settings/      # 系统设置
+│   ├── (immersive)/              # 沉浸式路由组（无侧边栏）
+│   │   └── exams/[id]/
+│   │       ├── grading/          # 试卷批改
+│   │       └── take/             # 考试答题
+│   ├── layout.tsx                # 根布局
+│   └── page.tsx                  # 首页重定向
+├── components/                   # 组件目录
+│   ├── features/                 # 功能组件（按业务模块划分）
+│   │   ├── analytics/            # 数据分析图表
+│   │   ├── auth/                 # 认证相关
+│   │   ├── course/               # 课程相关
+│   │   │   └── courseware/       # 课件播放器
+│   │   ├── dashboard/            # 仪表盘
+│   │   ├── discussion/           # 讨论交流
+│   │   ├── exam/                 # 考试相关
+│   │   │   └── grading/          # 批改功能
+│   │   ├── resource/             # 资源管理
+│   │   │   └── preview/          # 预览组件
+│   │   ├── settings/             # 系统设置
+│   │   └── slice/                # 切片浏览器
+│   ├── layout/                   # 布局组件
+│   │   ├── Header.tsx            # 顶部导航
+│   │   ├── Sidebar.tsx           # 侧边栏
+│   │   └── PageWrapper.tsx       # 页面包装器
+│   ├── shared/                   # 共享组件
+│   │   ├── EmptyState.tsx        # 空状态
+│   │   ├── LoadingSkeleton.tsx   # 加载骨架
+│   │   └── ThemeToggle.tsx       # 主题切换
+│   └── ui/                       # shadcn/ui 基础组件
+├── config/                       # 配置文件
+│   └── navigation.ts             # 导航配置
+├── lib/                          # 工具库
+│   ├── mock/                     # Mock 数据
+│   │   ├── courses.ts            # 课程数据
+│   │   ├── exams.ts              # 考试数据
+│   │   ├── questions.ts          # 题库数据
+│   │   ├── resources.ts          # 资源数据
+│   │   ├── slices.ts             # 切片数据
+│   │   └── users.ts              # 用户数据
+│   ├── constants.ts              # 常量定义
+│   └── utils.ts                  # 工具函数
+├── stores/                       # Zustand 状态管理
+│   ├── analysisStore.ts          # 智能分析状态
+│   ├── authStore.ts              # 认证状态
+│   ├── courseStore.ts            # 课程状态
+│   ├── discussionStore.ts        # 讨论状态
+│   ├── examStore.ts              # 考试状态
+│   ├── resourceStore.ts          # 资源状态
+│   ├── sliceStore.ts             # 切片状态
+│   ├── sliceUploadStore.ts       # 切片上传状态
+│   └── themeStore.ts             # 主题状态
+├── types/                        # TypeScript 类型定义
+│   ├── analysis.ts               # 分析模块类型
+│   ├── course.ts                 # 课程类型
+│   ├── discussion.ts             # 讨论类型
+│   ├── exam.ts                   # 考试类型
+│   ├── resource.ts               # 资源类型
+│   ├── slice.ts                  # 切片类型
+│   └── user.ts                   # 用户类型
+├── public/                       # 静态资源
+└── docs/                         # 文档目录
+```
+
+### 7.2 组件原则
 
 - 使用 Tailwind CSS + shadcn/ui 基础组件
 - MUI 用于复杂交互组件（如数据表格、日期选择器）
 - 保持组件原子化，便于复用
 
-### 7.2 命名规范
+### 7.3 路由组说明
 
-```
-components/
-├── ui/                    # 基础UI组件 (shadcn)
-│   ├── button.tsx
-│   ├── card.tsx
-│   └── input.tsx
-├── layout/                # 布局组件
-│   ├── Header.tsx
-│   ├── Sidebar.tsx
-│   └── Footer.tsx
-├── features/              # 功能组件
-│   ├── SliceViewer/       # 切片浏览器
-│   ├── CoursePlayer/      # 课程播放器
-│   └── ExamCard/          # 考试卡片
-└── shared/                # 共享组件
-    ├── ProgressChart.tsx
-    └── StatusBadge.tsx
-```
+| 路由组 | 布局特点 | 适用场景 |
+|--------|----------|----------|
+| `(auth)` | 简洁布局，无侧边栏 | 登录、注册等认证页面 |
+| `(dashboard)` | 标准布局，含侧边栏和顶部导航 | 常规功能页面 |
+| `(immersive)` | 沉浸式布局，无侧边栏 | 考试答题、试卷批改等需要全屏的场景 |
 
-### 7.3 状态管理
+### 7.4 状态管理
 
 使用 Zustand 按功能模块划分 store：
 
@@ -213,12 +361,11 @@ interface SliceState {
 }
 ```
 
-### 7.4 编写规范
+### 7.5 编写规范
 
 **声明组件：**
 
 ```typescript
-
 interface PartProps {
   paramA: string
   paramB: number
@@ -228,6 +375,22 @@ export function Part({paramA, paramB}: PartProps): ReactNode {
   ...
 }
 ```
+
+### 7.6 Mock 数据规范
+
+所有 Mock 数据位于 `lib/mock/` 目录，用于前端原型开发：
+
+| 文件 | 说明 |
+|------|------|
+| `courses.ts` | 课程列表、章节信息 |
+| `exams.ts` | 考试列表、考试详情 |
+| `questions.ts` | 题库数据 |
+| `results.ts` | 考试成绩数据 |
+| `resources.ts` | 教学资源数据 |
+| `slices.ts` | 病理切片数据 |
+| `users.ts` | 用户信息、学生名单 |
+| `discussions.ts` | 讨论帖子数据 |
+| `grading.ts` | 批改相关数据 |
 
 ---
 
@@ -308,4 +471,72 @@ const pageVariants = {
 
 | 日期 | 版本 | 变更内容 |
 |------|------|----------|
+| 2026-04-06 | 1.1 | 添加深色模式规范、主题系统实现指南、MUI 组件适配规范 |
 | 2026-03-29 | 1.0 | 初始版本，基于设计方案创建 |
+
+---
+
+## 十二、深色模式开发指南
+
+### 12.1 核心原则
+
+**深色模式下文字颜色原则：** 所有文字应为浅色或白色，确保可读性。
+
+### 12.2 Button 组件适配
+
+Button 组件需要在 variant 中显式设置深色模式文字颜色：
+
+```tsx
+// button.tsx variants 配置
+outline: "border-border bg-background text-foreground hover:bg-muted hover:text-foreground dark:text-foreground..."
+ghost: "text-foreground hover:bg-muted hover:text-foreground dark:text-foreground..."
+```
+
+### 12.3 时间戳与水合警告
+
+使用时间戳等客户端生成内容时，需添加 `suppressHydrationWarning`：
+
+```tsx
+<Typography variant="caption" suppressHydrationWarning>
+  {message.timestamp.toLocaleTimeString()}
+</Typography>
+```
+
+### 12.4 智能问答助手组件规范
+
+**建议问题功能实现：**
+
+```tsx
+// 只有最后一条助手消息显示建议问题
+{chatMessages.map((message, index) => {
+  const isLastAssistantMessage =
+    message.role === 'assistant' &&
+    index === chatMessages.length - 1
+  return (
+    <MessageBubble
+      key={message.id}
+      message={message}
+      isLastAssistantMessage={isLastAssistantMessage}
+      onSendQuestion={handleSend}
+      isChatLoading={isChatLoading}
+    />
+  )
+})}
+
+// MessageBubble 组件中的建议问题按钮
+<Button
+  variant="outline"
+  size="sm"
+  onClick={() => onSendQuestion(q)}
+  disabled={isChatLoading}
+>
+  {q}
+</Button>
+```
+
+### 12.5 避免的常见错误
+
+1. **硬编码颜色值** - 深色模式下不可见
+2. **MUI 组件使用默认主题色** - 与 Tailwind 主题不兼容
+3. **忽略 `dark:` 前缀** - Tailwind 类需要在深色模式下显式设置
+4. **rgba 硬编码** - 使用 `color-mix()` 替代

@@ -25,9 +25,11 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronLeft,
+  Send,
+  X,
 } from 'lucide-react'
 import { CourseCategoryLabels, CourseCategory } from '@/types/course'
-import { Exam } from '@/types/exam'
+import { Exam, Question } from '@/types/exam'
 
 interface QuestionTypeConfig {
   type: string
@@ -43,7 +45,7 @@ interface ValidationError {
 
 export default function CreateExamPage(): ReactNode {
   const { user } = useAuthStore()
-  const { createExam } = useExamStore()
+  const { createExam, addExam } = useExamStore()
   const router = useRouter()
   const canCreateExam = user?.role === 'teacher' || user?.role === 'admin'
 
@@ -61,16 +63,18 @@ export default function CreateExamPage(): ReactNode {
 
   // 题型配置
   const [questionTypes, setQuestionTypes] = useState<QuestionTypeConfig[]>([
-    { type: 'single', label: '单选题', count: 20, scorePerQuestion: 2 },
-    { type: 'multiple', label: '多选题', count: 10, scorePerQuestion: 3 },
-    { type: 'judgment', label: '判断题', count: 10, scorePerQuestion: 1 },
+    { type: 'single', label: '单选题', count: 10, scorePerQuestion: 2 },
+    { type: 'multiple', label: '多选题', count: 5, scorePerQuestion: 3 },
+    { type: 'judgment', label: '判断题', count: 5, scorePerQuestion: 1 },
     { type: 'short_answer', label: '简答题', count: 2, scorePerQuestion: 10 },
   ])
 
   // 验证错误
   const [errors, setErrors] = useState<ValidationError[]>([])
-  const [isCreating, setIsCreating] = useState(false)
-  const [previewExam, setPreviewExam] = useState<Exam | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  // 生成的试卷
+  const [generatedExam, setGeneratedExam] = useState<Exam | null>(null)
   const [showPreview, setShowPreview] = useState(false)
 
   // 权限检查
@@ -100,6 +104,10 @@ export default function CreateExamPage(): ReactNode {
         ? prev.filter(c => c !== category)
         : [...prev, category]
     )
+    // 清除已生成的试卷
+    if (generatedExam) {
+      setGeneratedExam(null)
+    }
   }
 
   const updateQuestionType = (type: string, field: 'count' | 'scorePerQuestion', value: number) => {
@@ -108,41 +116,42 @@ export default function CreateExamPage(): ReactNode {
         qt.type === type ? { ...qt, [field]: value } : qt
       )
     )
+    // 清除已生成的试卷
+    if (generatedExam) {
+      setGeneratedExam(null)
+    }
   }
 
   const totalQuestions = questionTypes.reduce((sum, qt) => sum + qt.count, 0)
-  const totalScore = questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0)
+  const totalScore = generatedExam
+    ? generatedExam.totalScore
+    : questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0)
 
   // 验证表单
   const validateForm = (): boolean => {
     const newErrors: ValidationError[] = []
 
-    // 验证试卷名称
     if (!examName.trim()) {
       newErrors.push({ field: 'examName', message: '请输入试卷名称' })
     }
 
-    // 验证考试时长
     if (duration <= 0) {
       newErrors.push({ field: 'duration', message: '考试时长必须大于0分钟' })
     }
 
-    // 验证知识点范围
     if (selectedCategories.length === 0) {
       newErrors.push({ field: 'categories', message: '请至少选择一个知识点范围' })
     }
 
-    // 验证题目数量
     if (totalQuestions === 0) {
       newErrors.push({ field: 'questionTypes', message: '请至少设置一种题型的数量' })
     }
 
-    // 验证难度分布总和
     if (difficultyEasy + difficultyMedium + difficultyHard !== 100) {
       newErrors.push({ field: 'difficulty', message: '难度分布总和必须为100%' })
     }
 
-    // 验证题库是否有足够的题目
+    // 检查题库是否有足够的题目
     const availableQuestions = mockQuestions.filter(q =>
       selectedCategories.includes(q.category)
     )
@@ -157,41 +166,17 @@ export default function CreateExamPage(): ReactNode {
     return newErrors.length === 0
   }
 
-  // 生成试卷预览
-  const handlePreview = () => {
+  // 生成试卷
+  const handleGenerateExam = async () => {
     if (!validateForm()) return
 
-    const exam = createExam({
-      name: examName,
-      duration,
-      categories: selectedCategories as CourseCategory[],
-      difficultyDistribution: {
-        easy: difficultyEasy,
-        medium: difficultyMedium,
-        hard: difficultyHard,
-      },
-      questionTypes: {
-        single: questionTypes.find(q => q.type === 'single')?.count || 0,
-        multiple: questionTypes.find(q => q.type === 'multiple')?.count || 0,
-        judgment: questionTypes.find(q => q.type === 'judgment')?.count || 0,
-        shortAnswer: questionTypes.find(q => q.type === 'short_answer')?.count || 0,
-      },
-      totalScore,
-    })
+    setIsGenerating(true)
 
-    setPreviewExam(exam)
-    setShowPreview(true)
-  }
-
-  // 创建并发布考试
-  const handleCreateExam = async () => {
-    if (!validateForm()) return
-
-    setIsCreating(true)
+    // 模拟生成延迟
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
     try {
-      // 创建考试
-      createExam({
+      const exam = createExam({
         name: examName,
         duration,
         categories: selectedCategories as CourseCategory[],
@@ -206,16 +191,24 @@ export default function CreateExamPage(): ReactNode {
           judgment: questionTypes.find(q => q.type === 'judgment')?.count || 0,
           shortAnswer: questionTypes.find(q => q.type === 'short_answer')?.count || 0,
         },
-        totalScore,
+        totalScore: questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0),
       })
 
-      // 跳转到考试中心
-      router.push('/exams')
+      setGeneratedExam(exam)
+      setErrors([])
     } catch (error) {
-      console.error('创建考试失败:', error)
+      console.error('生成试卷失败:', error)
     } finally {
-      setIsCreating(false)
+      setIsGenerating(false)
     }
+  }
+
+  // 发布考试
+  const handlePublishExam = () => {
+    if (!generatedExam) return
+
+    // 跳转到考试中心
+    router.push('/exams')
   }
 
   // 保存草稿
@@ -225,7 +218,6 @@ export default function CreateExamPage(): ReactNode {
       return
     }
 
-    // TODO: 实现保存草稿功能
     alert('草稿保存成功')
   }
 
@@ -234,7 +226,7 @@ export default function CreateExamPage(): ReactNode {
     return errors.find(e => e.field === field)?.message
   }
 
-  // 检查知识点范围内的题目是否足够
+  // 检查知识点范围内的题目数量
   const getCategoryQuestionCount = (category: string): number => {
     return mockQuestions.filter(q => q.category === category).length
   }
@@ -270,6 +262,17 @@ export default function CreateExamPage(): ReactNode {
                 <li key={index}>{error.message}</li>
               ))}
             </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* 生成成功提示 */}
+      {generatedExam && (
+        <Alert className="border-success/50 bg-success/10">
+          <CheckCircle2 className="h-4 w-4 text-success" />
+          <AlertDescription className="text-success">
+            试卷生成成功！共 {generatedExam.totalQuestions} 题，满分 {generatedExam.totalScore} 分。
+            请预览确认后发布。
           </AlertDescription>
         </Alert>
       )}
@@ -395,7 +398,10 @@ export default function CreateExamPage(): ReactNode {
                       min={0}
                       max={100}
                       step={5}
-                      onValueChange={([v]) => setDifficultyEasy(v)}
+                      onValueChange={([v]) => {
+                        setDifficultyEasy(v)
+                        if (generatedExam) setGeneratedExam(null)
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -408,7 +414,10 @@ export default function CreateExamPage(): ReactNode {
                       min={0}
                       max={100}
                       step={5}
-                      onValueChange={([v]) => setDifficultyMedium(v)}
+                      onValueChange={([v]) => {
+                        setDifficultyMedium(v)
+                        if (generatedExam) setGeneratedExam(null)
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -421,7 +430,10 @@ export default function CreateExamPage(): ReactNode {
                       min={0}
                       max={100}
                       step={5}
-                      onValueChange={([v]) => setDifficultyHard(v)}
+                      onValueChange={([v]) => {
+                        setDifficultyHard(v)
+                        if (generatedExam) setGeneratedExam(null)
+                      }}
                     />
                   </div>
                 </div>
@@ -471,11 +483,39 @@ export default function CreateExamPage(): ReactNode {
 
               {/* 统计信息 */}
               <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
-                <CheckCircle2 className="w-5 h-5 text-success" />
+                <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
                 <div className="text-sm">
                   共 <span className="font-medium text-foreground">{totalQuestions}</span> 题，
-                  满分 <span className="font-medium text-foreground">{totalScore}</span> 分
+                  预计满分 <span className="font-medium text-foreground">
+                    {questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0)}
+                  </span> 分
                 </div>
+              </div>
+
+              {/* 生成按钮 */}
+              <div className="flex items-center gap-4">
+                <Button
+                  className="gap-2"
+                  onClick={handleGenerateExam}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      生成中...
+                    </>
+                  ) : generatedExam ? (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      重新生成
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-4 h-4" />
+                      生成试卷
+                    </>
+                  )}
+                </Button>
               </div>
             </TabsContent>
 
@@ -528,6 +568,19 @@ export default function CreateExamPage(): ReactNode {
 
           <Separator className="my-4" />
 
+          <div className="space-y-2">
+            <span className="text-sm text-muted-foreground">各系统题目分布：</span>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(questionStats.byCategory).map(([key, count]) => (
+                <Badge key={key} variant="outline">
+                  {CourseCategoryLabels[key as CourseCategory] || key}: {count}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <Separator className="my-4" />
+
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <span>难度分布：</span>
             <Badge variant="outline">简单 {questionStats.byDifficulty.easy}</Badge>
@@ -539,48 +592,46 @@ export default function CreateExamPage(): ReactNode {
 
       {/* 操作按钮 */}
       <div className="flex items-center justify-end gap-3">
-        <Button variant="outline" onClick={handlePreview}>
-          <Eye className="w-4 h-4 mr-2" />
-          预览试卷
-        </Button>
         <Button variant="outline" onClick={handleSaveDraft}>
           <Save className="w-4 h-4 mr-2" />
           保存草稿
         </Button>
-        <Button onClick={handleCreateExam} disabled={isCreating}>
-          {isCreating ? (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              创建中...
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              发布考试
-            </>
-          )}
+        <Button
+          variant="outline"
+          onClick={() => setShowPreview(true)}
+          disabled={!generatedExam}
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          预览试卷
+        </Button>
+        <Button
+          onClick={handlePublishExam}
+          disabled={!generatedExam}
+        >
+          <Send className="w-4 h-4 mr-2" />
+          发布考试
         </Button>
       </div>
 
       {/* 预览对话框 */}
-      {showPreview && previewExam && (
+      {showPreview && generatedExam && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <CardHeader>
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <CardHeader className="flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>{previewExam.title}</CardTitle>
+                  <CardTitle>{generatedExam.title}</CardTitle>
                   <CardDescription>
-                    共 {previewExam.totalQuestions} 题，满分 {previewExam.totalScore} 分
+                    共 {generatedExam.totalQuestions} 题，满分 {generatedExam.totalScore} 分
                   </CardDescription>
                 </div>
-                <Button variant="ghost" onClick={() => setShowPreview(false)}>
-                  关闭
+                <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
+                  <X className="w-5 h-5" />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {previewExam.questions.map((q, index) => (
+            <CardContent className="flex-1 overflow-auto space-y-4">
+              {generatedExam.questions.map((q, index) => (
                 <div key={q.id} className="p-4 rounded-lg border">
                   <div className="flex items-start gap-2">
                     <span className="font-medium">{index + 1}.</span>
@@ -601,6 +652,9 @@ export default function CreateExamPage(): ReactNode {
                         </Badge>
                         <Badge variant="outline">
                           {q.difficulty === 'easy' ? '简单' : q.difficulty === 'medium' ? '中等' : '困难'}
+                        </Badge>
+                        <Badge variant="outline">
+                          {CourseCategoryLabels[q.category as CourseCategory] || q.category}
                         </Badge>
                         <span className="text-sm text-muted-foreground">{q.score}分</span>
                       </div>

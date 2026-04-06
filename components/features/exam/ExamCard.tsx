@@ -25,11 +25,13 @@ import {
   FileCheck,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
+import { useExamStore } from '@/stores/examStore'
 
 interface ExamCardProps {
   className?: string
   exam: Exam
   userRole?: 'student' | 'teacher' | 'admin'
+  studentId?: string
 }
 
 const statusConfig: Record<ExamStatus, { label: string; color: string }> = {
@@ -40,10 +42,27 @@ const statusConfig: Record<ExamStatus, { label: string; color: string }> = {
   graded: { label: '已批改', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
 }
 
-export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProps): ReactNode {
+export function ExamCard({ className, exam, userRole = 'student', studentId }: ExamCardProps): ReactNode {
   const status = statusConfig[exam.status]
+  const { hasStudentSubmitted, getStudentSubmission } = useExamStore()
+
+  // 检查学生是否已提交
+  const hasSubmitted = userRole === 'student' && studentId && hasStudentSubmitted(exam.id, studentId)
+  const submission = hasSubmitted ? getStudentSubmission(exam.id, studentId!) : undefined
 
   const renderActionButton = () => {
+    // 学生已提交 - 显示查看解析
+    if (userRole === 'student' && hasSubmitted) {
+      return (
+        <Link href={`/exams/${exam.id}/result`}>
+          <Button variant="outline" className="gap-2">
+            <Eye className="w-4 h-4" />
+            查看解析
+          </Button>
+        </Link>
+      )
+    }
+
     switch (exam.status) {
       case 'published':
       case 'ongoing':
@@ -129,8 +148,22 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
           </div>
         </div>
 
-        {/* 已批改显示成绩 */}
-        {exam.status === 'graded' && (
+        {/* 学生已提交显示成绩 */}
+        {userRole === 'student' && hasSubmitted && submission && (
+          <div className="mt-4 p-3 rounded-lg bg-secondary/10 border border-secondary/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">考试已完成</span>
+              <span className="text-2xl font-bold text-secondary">{submission.score}</span>
+            </div>
+            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+              <span>满分: {exam.totalScore}</span>
+              <span>正确率: {Math.round((submission.score / exam.totalScore) * 100)}%</span>
+            </div>
+          </div>
+        )}
+
+        {/* 已批改显示成绩 - 仅学生可见（未提交过但有成绩的情况） */}
+        {exam.status === 'graded' && userRole === 'student' && !hasSubmitted && (
           <div className="mt-4 p-3 rounded-lg bg-muted/50">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">考试成绩</span>
@@ -139,6 +172,20 @@ export function ExamCard({ className, exam, userRole = 'student' }: ExamCardProp
             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
               <span>排名: 12/45</span>
               <span>正确率: 85%</span>
+            </div>
+          </div>
+        )}
+
+        {/* 已批改显示班级统计 - 仅教师/管理员可见 */}
+        {exam.status === 'graded' && userRole !== 'student' && (
+          <div className="mt-4 p-3 rounded-lg bg-muted/50">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">班级统计</span>
+              <span className="text-lg font-bold text-secondary">已批改</span>
+            </div>
+            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+              <span>平均分: 78</span>
+              <span>提交: 45人</span>
             </div>
           </div>
         )}

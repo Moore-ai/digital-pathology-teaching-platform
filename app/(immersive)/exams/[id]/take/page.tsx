@@ -3,11 +3,12 @@
 import type { ReactNode } from 'react'
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { QuestionDisplay, AnswerSheet, ExamTimer } from '@/components/features/exam'
 import { getExamById } from '@/lib/mock/exams'
-import { mockQuestions } from '@/lib/mock/questions'
 import { useExamStore } from '@/stores/examStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -18,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle } from 'lucide-react'
 
 interface ExamTakePageProps {
   params: Promise<{ id: string }>
@@ -26,10 +27,15 @@ interface ExamTakePageProps {
 
 export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
   const { id } = use(params)
-  const exam = getExamById(id)
+  const router = useRouter()
+  const { user } = useAuthStore()
+  const { exams: createdExams } = useExamStore()
 
-  // 使用 mock 题目
-  const questions = mockQuestions
+  // 先从store中查找，再从mock数据中查找
+  const exam = createdExams.find(e => e.id === id) || getExamById(id)
+
+  // 使用考试中的题目
+  const questions = exam?.questions || []
 
   const {
     currentQuestionIndex,
@@ -42,15 +48,24 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
     setTimeRemaining,
     pauseExam,
     resumeExam,
-    submitExam,
+    submitStudentExam,
+    setCurrentExam,
+    resetExam,
   } = useExamStore()
 
   // 初始化考试
   useEffect(() => {
     if (exam) {
+      // 设置当前考试
+      setCurrentExam(exam)
       setTimeRemaining(exam.duration * 60)
     }
-  }, [exam, setTimeRemaining])
+
+    // 清理：退出时重置
+    return () => {
+      // 不在这里重置，否则会影响提交记录
+    }
+  }, [exam, setCurrentExam, setTimeRemaining])
 
   // 计时器
   useEffect(() => {
@@ -65,9 +80,24 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
 
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showResultDialog, setShowResultDialog] = useState(false)
+  const [submittedScore, setSubmittedScore] = useState(0)
 
   if (!exam) {
     notFound()
+  }
+
+  // 如果没有题目，显示提示
+  if (questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">该考试暂无题目</p>
+          <Link href="/exams">
+            <Button className="mt-4">返回考试列表</Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const currentQuestion = questions[currentQuestionIndex]
@@ -87,9 +117,16 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
   }
 
   const confirmSubmit = () => {
-    submitExam()
+    // 提交考试并获取分数
+    const score = submitStudentExam(id, user?.id || '')
+    setSubmittedScore(score)
     setShowSubmitDialog(false)
     setShowResultDialog(true)
+  }
+
+  const handleReturnToList = () => {
+    setShowResultDialog(false)
+    router.push('/exams')
   }
 
   return (
@@ -194,19 +231,30 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>考试完成</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-success" />
+              考试完成
+            </DialogTitle>
             <DialogDescription>
-              您的试卷已提交成功，请等待老师批改。
+              您的试卷已提交成功。
             </DialogDescription>
           </DialogHeader>
           <div className="py-6 text-center">
-            <div className="text-4xl font-bold text-secondary mb-2">85</div>
-            <p className="text-muted-foreground">预估得分（仅供参考）</p>
+            <div className="text-4xl font-bold text-secondary mb-2">
+              {submittedScore}
+            </div>
+            <p className="text-muted-foreground">
+              得分 / 满分 {exam.totalScore}
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              正确率: {exam.totalScore > 0 ? Math.round((submittedScore / exam.totalScore) * 100) : 0}%
+            </p>
           </div>
-          <DialogFooter>
-            <Link href="/exams">
-              <Button>返回考试列表</Button>
+          <DialogFooter className="flex gap-2">
+            <Link href={`/exams/${exam.id}/result`}>
+              <Button variant="outline">查看解析</Button>
             </Link>
+            <Button onClick={handleReturnToList}>返回考试列表</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,7 +1,16 @@
 import { create } from 'zustand';
-import { Exam, ExamConfig, Question } from '@/types/exam';
+import { Exam, ExamConfig, Question, ExamSubmission } from '@/types/exam';
 import { CourseCategory } from '@/types/course';
 import { mockQuestions } from '@/lib/mock/questions';
+
+// 学生提交记录接口
+interface StudentSubmission {
+  examId: string;
+  studentId: string;
+  score: number;
+  answers: Map<string, string | string[]>;
+  submittedAt: Date;
+}
 
 interface ExamState {
   currentExam: Exam | null;
@@ -16,6 +25,9 @@ interface ExamState {
 
   // 所有考试列表（包括新创建的）
   exams: Exam[];
+
+  // 学生提交记录
+  studentSubmissions: StudentSubmission[];
 
   // Actions
   setCurrentExam: (exam: Exam) => void;
@@ -32,6 +44,11 @@ interface ExamState {
   createExam: (config: ExamConfig) => Exam;
   addExam: (exam: Exam) => void;
   getExams: () => Exam[];
+
+  // 学生提交相关
+  submitStudentExam: (examId: string, studentId: string) => number;
+  getStudentSubmission: (examId: string, studentId: string) => StudentSubmission | undefined;
+  hasStudentSubmitted: (examId: string, studentId: string) => boolean;
 }
 
 export const useExamStore = create<ExamState>((set, get) => ({
@@ -43,6 +60,7 @@ export const useExamStore = create<ExamState>((set, get) => ({
   isPaused: false,
   examConfig: null,
   exams: [],
+  studentSubmissions: [],
 
   setCurrentExam: (exam) => set({
     currentExam: exam,
@@ -68,10 +86,31 @@ export const useExamStore = create<ExamState>((set, get) => ({
   resumeExam: () => set({ isPaused: false }),
 
   submitExam: () => {
-    const { currentExam } = get();
+    const { currentExam, answers } = get();
     if (!currentExam) return;
 
-    // 计算分数（Mock 逻辑）
+    // 计算分数
+    let score = 0;
+    currentExam.questions.forEach((question) => {
+      const userAnswer = answers.get(question.id);
+      if (userAnswer) {
+        if (question.type === 'multiple') {
+          const correctAnswers = question.correctAnswer as string[];
+          const userAnswers = userAnswer as string[];
+          if (
+            correctAnswers.length === userAnswers.length &&
+            correctAnswers.every(a => userAnswers.includes(a))
+          ) {
+            score += question.score;
+          }
+        } else {
+          if (userAnswer === question.correctAnswer) {
+            score += question.score;
+          }
+        }
+      }
+    });
+
     set({ isSubmitted: true, isPaused: true });
   },
 
@@ -176,6 +215,70 @@ export const useExamStore = create<ExamState>((set, get) => ({
   })),
 
   getExams: () => get().exams,
+
+  // 提交学生考试，返回分数
+  submitStudentExam: (examId: string, studentId: string): number => {
+    const { currentExam, answers, studentSubmissions } = get();
+    if (!currentExam || currentExam.id !== examId) return 0;
+
+    // 计算分数
+    let score = 0;
+    let correctCount = 0;
+    currentExam.questions.forEach((question) => {
+      const userAnswer = answers.get(question.id);
+      if (userAnswer) {
+        if (question.type === 'multiple') {
+          const correctAnswers = question.correctAnswer as string[];
+          const userAnswers = userAnswer as string[];
+          if (
+            correctAnswers.length === userAnswers.length &&
+            correctAnswers.every(a => userAnswers.includes(a))
+          ) {
+            score += question.score;
+            correctCount++;
+          }
+        } else {
+          if (userAnswer === question.correctAnswer) {
+            score += question.score;
+            correctCount++;
+          }
+        }
+      }
+    });
+
+    // 保存提交记录
+    const submission: StudentSubmission = {
+      examId,
+      studentId,
+      score,
+      answers: new Map(answers),
+      submittedAt: new Date(),
+    };
+
+    set({
+      studentSubmissions: [...studentSubmissions, submission],
+      isSubmitted: true,
+      isPaused: true,
+    });
+
+    return score;
+  },
+
+  // 获取学生提交记录
+  getStudentSubmission: (examId: string, studentId: string): StudentSubmission | undefined => {
+    const { studentSubmissions } = get();
+    return studentSubmissions.find(
+      s => s.examId === examId && s.studentId === studentId
+    );
+  },
+
+  // 检查学生是否已提交考试
+  hasStudentSubmitted: (examId: string, studentId: string): boolean => {
+    const { studentSubmissions } = get();
+    return studentSubmissions.some(
+      s => s.examId === examId && s.studentId === studentId
+    );
+  },
 }));
 
 // 计时器 Hook

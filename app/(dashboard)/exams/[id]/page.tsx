@@ -42,7 +42,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNode {
   const { id } = use(params)
-  const { exams: createdExams } = useExamStore()
+  const { exams: createdExams, getStudentSubmission, hasStudentSubmitted } = useExamStore()
   const { user } = useAuthStore()
 
   // 先从store中查找，再从mock数据中查找
@@ -56,9 +56,25 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin'
   const isStudent = user?.role === 'student'
 
+  // 检查学生是否已提交
+  const hasSubmitted = isStudent && hasStudentSubmitted(id, user?.id || '')
+  const studentSubmission = isStudent ? getStudentSubmission(id, user?.id || '') : undefined
+
   // 根据角色和考试状态渲染操作按钮
   const renderActionButtons = () => {
     if (isStudent) {
+      // 学生已提交 - 显示查看解析按钮
+      if (hasSubmitted) {
+        return (
+          <Link href={`/exams/${exam.id}/result`}>
+            <Button className="gap-2">
+              <Eye className="w-4 h-4" />
+              查看解析
+            </Button>
+          </Link>
+        )
+      }
+
       // 学生操作
       if (exam.status === 'published' || exam.status === 'ongoing') {
         return (
@@ -173,6 +189,10 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
   // 根据角色显示不同的提示文本
   const getStatusHint = () => {
     if (isStudent) {
+      // 已提交
+      if (hasSubmitted) {
+        return '您已完成考试，可查看答题解析'
+      }
       switch (exam.status) {
         case 'published': return '考试尚未开始，请在规定时间内参加'
         case 'ongoing': return '考试进行中，点击开始答题'
@@ -252,6 +272,36 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
           </div>
         </CardContent>
       </Card>
+
+      {/* 学生成绩卡片 - 仅已提交的学生可见 */}
+      {isStudent && hasSubmitted && studentSubmission && (
+        <Card className="border-secondary/30 bg-secondary/5">
+          <CardContent className="py-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-medium text-foreground">考试已完成</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  提交时间：{formatDate(studentSubmission.submittedAt)}
+                </p>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-secondary">
+                    {studentSubmission.score}
+                  </div>
+                  <div className="text-sm text-muted-foreground">得分</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-foreground">
+                    {exam.totalScore}
+                  </div>
+                  <div className="text-sm text-muted-foreground">满分</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 操作区域 */}
       <Card>

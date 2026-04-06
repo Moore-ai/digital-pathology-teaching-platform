@@ -23,6 +23,7 @@ import {
   Edit,
   CheckCircle,
   FileCheck,
+  AlertCircle,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
 import { useExamStore } from '@/stores/examStore'
@@ -44,11 +45,16 @@ const statusConfig: Record<ExamStatus, { label: string; color: string }> = {
 
 export function ExamCard({ className, exam, userRole = 'student', studentId }: ExamCardProps): ReactNode {
   const status = statusConfig[exam.status]
-  const { hasStudentSubmitted, getStudentSubmission } = useExamStore()
+  const { hasStudentSubmitted, getStudentSubmission, isGradingComplete } = useExamStore()
 
   // 检查学生是否已提交
   const hasSubmitted = userRole === 'student' && studentId && hasStudentSubmitted(exam.id, studentId)
   const submission = hasSubmitted ? getStudentSubmission(exam.id, studentId!) : undefined
+
+  // 检查是否有主观题需要批改
+  const hasSubjectiveQuestions = exam.questions?.some(q => q.type === 'short_answer') ?? false
+  const gradingComplete = hasSubmitted ? isGradingComplete(exam.id, studentId!) : true
+  const needsGrading = hasSubmitted && hasSubjectiveQuestions && !gradingComplete
 
   const renderActionButton = () => {
     // 学生已提交 - 显示查看解析
@@ -150,15 +156,27 @@ export function ExamCard({ className, exam, userRole = 'student', studentId }: E
 
         {/* 学生已提交显示成绩 */}
         {userRole === 'student' && hasSubmitted && submission && (
-          <div className="mt-4 p-3 rounded-lg bg-secondary/10 border border-secondary/20">
+          <div className={`mt-4 p-3 rounded-lg ${needsGrading ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800' : 'bg-secondary/10 border border-secondary/20'}`}>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">考试已完成</span>
-              <span className="text-2xl font-bold text-secondary">{submission.score}</span>
+              <span className="text-sm text-muted-foreground">
+                {needsGrading ? '客观题得分' : '考试已完成'}
+              </span>
+              <span className={`text-2xl font-bold ${needsGrading ? 'text-amber-600' : 'text-secondary'}`}>
+                {submission.score}{needsGrading ? '+' : ''}
+              </span>
             </div>
-            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-              <span>满分: {exam.totalScore}</span>
-              <span>正确率: {Math.round((submission.score / exam.totalScore) * 100)}%</span>
-            </div>
+            {needsGrading && (
+              <div className="flex items-center gap-1 mt-2 text-xs text-amber-600 dark:text-amber-400">
+                <AlertCircle className="w-3 h-3" />
+                <span>主观题批改中</span>
+              </div>
+            )}
+            {!needsGrading && (
+              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                <span>满分: {exam.totalScore}</span>
+                <span>正确率: {Math.round((submission.score / exam.totalScore) * 100)}%</span>
+              </div>
+            )}
           </div>
         )}
 

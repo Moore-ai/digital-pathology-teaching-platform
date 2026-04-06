@@ -88,6 +88,12 @@ export interface ExamConfig {
     judgment: number;
     shortAnswer: number;
   };
+  questionScores?: {   // 每题分值（可选）
+    single: number;
+    multiple: number;
+    judgment: number;
+    shortAnswer: number;
+  };
   totalScore: number;
 }
 

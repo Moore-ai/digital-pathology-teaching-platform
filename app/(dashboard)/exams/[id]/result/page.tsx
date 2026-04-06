@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
 import { getExamById } from '@/lib/mock/exams'
+import { useExamStore } from '@/stores/examStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +21,7 @@ import {
   FileText,
   Download,
   Share2,
+  AlertCircle,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
 
@@ -46,15 +49,30 @@ const mockResult = {
 
 export default function ExamResultPage({ params }: ResultPageProps): ReactNode {
   const { id } = use(params)
-  const exam = getExamById(id)
+  const { user } = useAuthStore()
+  const { isGradingComplete, getStudentSubmission, hasStudentSubmitted, exams: createdExams } = useExamStore()
+
+  // 先从store中查找，再从mock数据中查找
+  const exam = createdExams.find(e => e.id === id) ?? getExamById(id)
+
+  // 检查学生提交状态
+  const hasSubmitted = user?.role === 'student' && hasStudentSubmitted(id, user?.id || '')
+  const studentSubmission = user?.role === 'student' ? getStudentSubmission(id, user?.id || '') : undefined
+  const gradingComplete = hasSubmitted ? isGradingComplete(id, user?.id || '') : true
+
+  // 检查是否有主观题
+  const hasSubjectiveQuestions = exam?.questions?.some(q => q.type === 'short_answer') ?? false
+  const needsGrading = hasSubmitted && hasSubjectiveQuestions && !gradingComplete
 
   if (!exam) {
     notFound()
   }
 
+  // 使用学生提交记录中的实际成绩
+  const actualScore = studentSubmission?.score ?? mockResult.score
   const accuracy = Math.round((mockResult.correctCount / exam.totalQuestions) * 100)
-  const scoreLevel = mockResult.score >= 90 ? '优秀' : mockResult.score >= 80 ? '良好' : mockResult.score >= 60 ? '及格' : '不及格'
-  const scoreLevelColor = mockResult.score >= 90 ? 'text-success' : mockResult.score >= 80 ? 'text-secondary' : mockResult.score >= 60 ? 'text-warning' : 'text-error'
+  const scoreLevel = actualScore >= 90 ? '优秀' : actualScore >= 80 ? '良好' : actualScore >= 60 ? '及格' : '不及格'
+  const scoreLevelColor = actualScore >= 90 ? 'text-success' : actualScore >= 80 ? 'text-secondary' : actualScore >= 60 ? 'text-warning' : 'text-error'
 
   return (
     <PageWrapper className="space-y-6">
@@ -70,6 +88,25 @@ export default function ExamResultPage({ params }: ResultPageProps): ReactNode {
         <ChevronRight className="w-4 h-4" />
         <span className="text-foreground">成绩单</span>
       </nav>
+
+      {/* 主观题未批改提示 */}
+      {needsGrading && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+              <div>
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  主观题批改中
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  您的主观题答案正在等待教师批改，当前显示的是客观题得分。批改完成后可查看最终成绩。
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 成绩概览卡片 */}
       <Card className="bg-linear-to-r from-primary/5 to-secondary/5">
@@ -90,17 +127,25 @@ export default function ExamResultPage({ params }: ResultPageProps): ReactNode {
                   cx="80"
                   cy="80"
                   r="70"
-                  stroke="#2D8B8B"
+                  stroke={needsGrading ? '#F59E0B' : '#2D8B8B'}
                   strokeWidth="14"
                   fill="none"
                   strokeLinecap="round"
-                  strokeDasharray={`${mockResult.score * 4.4} 440`}
+                  strokeDasharray={`${actualScore * 4.4} 440`}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-primary">{mockResult.score}</div>
-                  <div className="text-sm text-muted-foreground">分</div>
+                  <div className="text-4xl font-bold text-primary">
+                    {needsGrading ? (
+                      <span className="text-amber-600">{actualScore}+</span>
+                    ) : (
+                      actualScore
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {needsGrading ? '客观题得分' : '分'}
+                  </div>
                 </div>
               </div>
             </div>

@@ -29,7 +29,7 @@ import {
   X,
 } from 'lucide-react'
 import { CourseCategoryLabels, CourseCategory } from '@/types/course'
-import { Exam, Question } from '@/types/exam'
+import { Exam } from '@/types/exam'
 
 interface QuestionTypeConfig {
   type: string
@@ -45,7 +45,7 @@ interface ValidationError {
 
 export default function CreateExamPage(): ReactNode {
   const { user } = useAuthStore()
-  const { createExam, addExam } = useExamStore()
+  const { createExam } = useExamStore()
   const router = useRouter()
   const canCreateExam = user?.role === 'teacher' || user?.role === 'admin'
 
@@ -123,9 +123,6 @@ export default function CreateExamPage(): ReactNode {
   }
 
   const totalQuestions = questionTypes.reduce((sum, qt) => sum + qt.count, 0)
-  const totalScore = generatedExam
-    ? generatedExam.totalScore
-    : questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0)
 
   // 验证表单
   const validateForm = (): boolean => {
@@ -151,14 +148,41 @@ export default function CreateExamPage(): ReactNode {
       newErrors.push({ field: 'difficulty', message: '难度分布总和必须为100%' })
     }
 
-    // 检查题库是否有足够的题目
-    const availableQuestions = mockQuestions.filter(q =>
-      selectedCategories.includes(q.category)
-    )
-    if (availableQuestions.length < totalQuestions) {
+    // 检查题库是否有足够的题目（按题型检查）
+    const availableByType = {
+      single: mockQuestions.filter(q => selectedCategories.includes(q.category) && q.type === 'single').length,
+      multiple: mockQuestions.filter(q => selectedCategories.includes(q.category) && q.type === 'multiple').length,
+      judgment: mockQuestions.filter(q => selectedCategories.includes(q.category) && q.type === 'judgment').length,
+      short_answer: mockQuestions.filter(q => selectedCategories.includes(q.category) && q.type === 'short_answer').length,
+    }
+
+    const requiredByType = {
+      single: questionTypes.find(q => q.type === 'single')?.count || 0,
+      multiple: questionTypes.find(q => q.type === 'multiple')?.count || 0,
+      judgment: questionTypes.find(q => q.type === 'judgment')?.count || 0,
+      short_answer: questionTypes.find(q => q.type === 'short_answer')?.count || 0,
+    }
+
+    const shortageMessages: string[] = []
+    const typeLabels: Record<string, string> = {
+      single: '单选题',
+      multiple: '多选题',
+      judgment: '判断题',
+      short_answer: '简答题',
+    }
+
+    Object.entries(requiredByType).forEach(([type, required]) => {
+      if (required > 0 && availableByType[type as keyof typeof availableByType] < required) {
+        shortageMessages.push(
+          `${typeLabels[type]}需要${required}题，仅${availableByType[type as keyof typeof availableByType]}题可用`
+        )
+      }
+    })
+
+    if (shortageMessages.length > 0) {
       newErrors.push({
         field: 'questionTypes',
-        message: `所选知识点范围内题目不足，共需${totalQuestions}题，当前可用${availableQuestions.length}题`
+        message: `题库题目不足：${shortageMessages.join('；')}`
       })
     }
 
@@ -190,6 +214,12 @@ export default function CreateExamPage(): ReactNode {
           multiple: questionTypes.find(q => q.type === 'multiple')?.count || 0,
           judgment: questionTypes.find(q => q.type === 'judgment')?.count || 0,
           shortAnswer: questionTypes.find(q => q.type === 'short_answer')?.count || 0,
+        },
+        questionScores: {
+          single: questionTypes.find(q => q.type === 'single')?.scorePerQuestion || 2,
+          multiple: questionTypes.find(q => q.type === 'multiple')?.scorePerQuestion || 3,
+          judgment: questionTypes.find(q => q.type === 'judgment')?.scorePerQuestion || 1,
+          shortAnswer: questionTypes.find(q => q.type === 'short_answer')?.scorePerQuestion || 10,
         },
         totalScore: questionTypes.reduce((sum, qt) => sum + qt.count * qt.scorePerQuestion, 0),
       })
@@ -617,7 +647,7 @@ export default function CreateExamPage(): ReactNode {
       {showPreview && generatedExam && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <CardHeader className="flex-shrink-0">
+            <CardHeader className="shrink-0">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>{generatedExam.title}</CardTitle>

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { use } from 'react'
+import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
@@ -25,6 +25,7 @@ import {
   Send,
   Trash2,
   ClipboardCheck,
+  AlertCircle,
 } from 'lucide-react'
 import { formatDate, formatDuration } from '@/lib/utils'
 
@@ -42,11 +43,11 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNode {
   const { id } = use(params)
-  const { exams: createdExams, getStudentSubmission, hasStudentSubmitted } = useExamStore()
+  const { exams: createdExams, getStudentSubmission, hasStudentSubmitted, isGradingComplete } = useExamStore()
   const { user } = useAuthStore()
 
   // 先从store中查找，再从mock数据中查找
-  const exam = createdExams.find(e => e.id === id) || getExamById(id)
+  const exam = createdExams.find(e => e.id === id) ?? getExamById(id)
 
   if (!exam) {
     notFound()
@@ -59,6 +60,11 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
   // 检查学生是否已提交
   const hasSubmitted = isStudent && hasStudentSubmitted(id, user?.id || '')
   const studentSubmission = isStudent ? getStudentSubmission(id, user?.id || '') : undefined
+
+  // 检查是否有主观题需要批改
+  const hasSubjectiveQuestions = exam.questions?.some(q => q.type === 'short_answer') ?? false
+  const gradingComplete = isStudent && hasSubmitted ? isGradingComplete(id, user?.id || '') : true
+  const needsGrading = hasSubmitted && hasSubjectiveQuestions && !gradingComplete
 
   // 根据角色和考试状态渲染操作按钮
   const renderActionButtons = () => {
@@ -75,8 +81,8 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
         )
       }
 
-      // 学生操作
-      if (exam.status === 'published' || exam.status === 'ongoing') {
+      // 学生操作 - 只有进行中才能考试
+      if (exam.status === 'ongoing') {
         return (
           <Link href={`/exams/${exam.id}/take`}>
             <Button className="gap-2">
@@ -297,6 +303,25 @@ export default function ExamDetailPage({ params }: ExamDetailPageProps): ReactNo
                   </div>
                   <div className="text-sm text-muted-foreground">满分</div>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 主观题未批改提示 */}
+      {isStudent && needsGrading && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+              <div>
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  主观题批改中
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  您的主观题答案正在等待教师批改，批改完成后可查看最终成绩。
+                </p>
               </div>
             </div>
           </CardContent>

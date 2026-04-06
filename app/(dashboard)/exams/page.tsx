@@ -18,10 +18,13 @@ export default function ExamsPage(): ReactNode {
   const { user } = useAuthStore()
   const { getExams } = useExamStore()
 
-  // 合并mock数据和新创建的考试
+  // 合并mock数据和新创建的考试（去重）
   const allExams = useMemo(() => {
     const storedExams = getExams()
-    return [...storedExams, ...mockExams]
+    // 过滤掉 mock 中已存在于 store 的考试
+    const storedIds = new Set(storedExams.map(e => e.id))
+    const uniqueMockExams = mockExams.filter(e => !storedIds.has(e.id))
+    return [...storedExams, ...uniqueMockExams]
   }, [getExams])
 
   // 筛选考试

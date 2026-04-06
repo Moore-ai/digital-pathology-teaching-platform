@@ -26,7 +26,6 @@ export function AnswerSheet({
   onSubmit,
   isSubmitted = false,
 }: AnswerSheetProps): ReactNode {
-  const answeredCount = answers.size
   const totalCount = questions.length
 
   const getQuestionStatus = (index: number) => {
@@ -35,6 +34,9 @@ export function AnswerSheet({
     return answer !== undefined && answer !== '' &&
            (Array.isArray(answer) ? answer.length > 0 : true)
   }
+
+  // 计算实际已答题数
+  const answeredCount = questions.filter((_, index) => getQuestionStatus(index)).length
 
   return (
     <div className={cn("flex flex-col bg-card border rounded-lg", className)}>
@@ -48,8 +50,8 @@ export function AnswerSheet({
         {/* 进度条 */}
         <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-secondary transition-all answer-progress"
-            data-progress={Math.round((answeredCount / totalCount) * 100)}
+            className="h-full bg-secondary transition-all duration-300"
+            style={{ width: `${totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0}%` }}
           />
         </div>
       </div>
@@ -109,12 +111,11 @@ export function AnswerSheet({
           <Button
             className="w-full"
             onClick={onSubmit}
-            disabled={answeredCount < totalCount}
           >
             提交试卷
           </Button>
           {answeredCount < totalCount && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
+            <p className="text-xs text-amber-600 text-center mt-2">
               还有 {totalCount - answeredCount} 题未作答
             </p>
           )}

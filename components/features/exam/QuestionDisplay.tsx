@@ -40,6 +40,17 @@ export function QuestionDisplay({
   showResult = false,
   disabled = false,
 }: QuestionDisplayProps): ReactNode {
+  // 如果没有题目，显示提示
+  if (!question) {
+    return (
+      <Card className={cn("", className)}>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          暂无题目
+        </CardContent>
+      </Card>
+    )
+  }
+
   const difficulty = difficultyLabels[question.difficulty]
 
   const handleOptionClick = (key: string) => {

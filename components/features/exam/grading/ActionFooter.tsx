@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, CheckCircle } from 'lucide-react'
 
 interface ActionFooterProps {
   hasPrevious: boolean
@@ -11,14 +11,17 @@ interface ActionFooterProps {
   onPrevious: () => void
   onSave: () => void
   onSaveAndNext: () => void
+  onComplete?: () => void
   className?: string
 }
 
 export function ActionFooter({
   hasPrevious,
+  hasNext,
   onPrevious,
   onSave,
   onSaveAndNext,
+  onComplete,
   className,
 }: ActionFooterProps): ReactNode {
   return (
@@ -40,10 +43,17 @@ export function ActionFooter({
           <Save className="w-4 h-4" />
           保存
         </Button>
-        <Button onClick={onSaveAndNext} className="gap-2">
-          保存并下一考生
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        {!hasNext && onComplete ? (
+          <Button onClick={onComplete} className="gap-2 bg-success hover:bg-success/90">
+            <CheckCircle className="w-4 h-4" />
+            完成批改
+          </Button>
+        ) : (
+          <Button onClick={onSaveAndNext} className="gap-2">
+            保存并下一考生
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     </div>
   )

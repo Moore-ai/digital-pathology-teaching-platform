@@ -32,7 +32,7 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
   const { exams: createdExams } = useExamStore()
 
   // 先从store中查找，再从mock数据中查找
-  const exam = createdExams.find(e => e.id === id) || getExamById(id)
+  const exam = createdExams.find(e => e.id === id) ?? getExamById(id)
 
   // 使用考试中的题目
   const questions = exam?.questions || []
@@ -100,8 +100,21 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
     )
   }
 
-  const currentQuestion = questions[currentQuestionIndex]
-  const currentAnswer = answers.get(currentQuestion?.id)
+  // 确保题目索引在有效范围内
+  const safeIndex = Math.min(Math.max(0, currentQuestionIndex), questions.length - 1)
+  const currentQuestion = questions[safeIndex]
+  const currentAnswer = currentQuestion ? answers.get(currentQuestion.id) : undefined
+
+  // 计算实际已答题数
+  const getActualAnsweredCount = () => {
+    return questions.filter(q => {
+      const answer = answers.get(q.id)
+      return answer !== undefined && answer !== '' &&
+             (Array.isArray(answer) ? answer.length > 0 : true)
+    }).length
+  }
+
+  const actualAnsweredCount = getActualAnsweredCount()
 
   const goToQuestion = (index: number) => {
     if (index >= 0 && index < questions.length) {
@@ -208,10 +221,10 @@ export default function ExamTakePage({ params }: ExamTakePageProps): ReactNode {
               确认提交试卷
             </DialogTitle>
             <DialogDescription>
-              您已作答 {answers.size} / {questions.length} 题。
-              {answers.size < questions.length && (
+              您已作答 {actualAnsweredCount} / {questions.length} 题。
+              {actualAnsweredCount < questions.length && (
                 <span className="text-amber-600">
-                  还有 {questions.length - answers.size} 题未作答，确定要提交吗？
+                  还有 {questions.length - actualAnsweredCount} 题未作答，确定要提交吗？
                 </span>
               )}
             </DialogDescription>

@@ -1,4 +1,38 @@
-import { Exam } from '@/types/exam';
+import { Exam, Question } from '@/types/exam';
+import { mockQuestions } from './questions';
+
+// 从题库中筛选特定分类的题目
+function getQuestionsForExam(categories: string[], count: number): Question[] {
+  const filtered = mockQuestions.filter(q => categories.includes(q.category));
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count).map((q, index) => ({
+    ...q,
+    id: `exam-q-${Date.now()}-${index}`,
+  }));
+}
+
+// 消化系统题目
+const digestiveQuestions: Question[] = mockQuestions
+  .filter(q => q.category === 'digestive')
+  .slice(0, 8)
+  .map((q, index) => ({ ...q, id: `exam-1-q-${index}` }));
+
+// 呼吸系统题目
+const respiratoryQuestions: Question[] = mockQuestions
+  .filter(q => q.category === 'respiratory')
+  .slice(0, 6)
+  .map((q, index) => ({ ...q, id: `exam-3-q-${index}` }));
+
+// 乳腺题目
+const breastQuestions: Question[] = mockQuestions
+  .filter(q => q.category === 'breast')
+  .slice(0, 5)
+  .map((q, index) => ({ ...q, id: `exam-4-q-${index}` }));
+
+// 综合题目
+const comprehensiveQuestions: Question[] = mockQuestions
+  .slice(0, 10)
+  .map((q, index) => ({ ...q, id: `exam-5-q-${index}` }));
 
 export const mockExams: Exam[] = [
   {
@@ -8,10 +42,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-04-15T09:00:00'),
     endTime: new Date('2026-04-15T11:00:00'),
     duration: 120,
-    totalQuestions: 50,
-    totalScore: 100,
+    totalQuestions: digestiveQuestions.length,
+    totalScore: digestiveQuestions.reduce((sum, q) => sum + q.score, 0),
     status: 'published',
-    questions: [],
+    questions: digestiveQuestions,
     createdBy: 'T001',
     createdAt: new Date('2026-03-01'),
   },
@@ -22,10 +56,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-03-18T14:00:00'),
     endTime: new Date('2026-03-18T15:30:00'),
     duration: 90,
-    totalQuestions: 5,
-    totalScore: 75,
+    totalQuestions: digestiveQuestions.slice(0, 5).length,
+    totalScore: digestiveQuestions.slice(0, 5).reduce((sum, q) => sum + q.score, 0),
     status: 'completed',
-    questions: [],
+    questions: digestiveQuestions.slice(0, 5),
     createdBy: 'T001',
     createdAt: new Date('2026-03-15'),
   },
@@ -36,10 +70,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-03-20T14:00:00'),
     endTime: new Date('2026-03-20T15:30:00'),
     duration: 90,
-    totalQuestions: 30,
-    totalScore: 100,
+    totalQuestions: digestiveQuestions.length,
+    totalScore: digestiveQuestions.reduce((sum, q) => sum + q.score, 0),
     status: 'graded',
-    questions: [],
+    questions: digestiveQuestions,
     createdBy: 'T001',
     createdAt: new Date('2026-03-15'),
   },
@@ -50,10 +84,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-04-01T10:00:00'),
     endTime: new Date('2026-04-01T11:00:00'),
     duration: 60,
-    totalQuestions: 20,
-    totalScore: 100,
+    totalQuestions: respiratoryQuestions.length,
+    totalScore: respiratoryQuestions.reduce((sum, q) => sum + q.score, 0),
     status: 'ongoing',
-    questions: [],
+    questions: respiratoryQuestions,
     createdBy: 'T002',
     createdAt: new Date('2026-03-25'),
   },
@@ -64,10 +98,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-04-05T14:00:00'),
     endTime: new Date('2026-04-05T14:45:00'),
     duration: 45,
-    totalQuestions: 15,
-    totalScore: 100,
+    totalQuestions: breastQuestions.length,
+    totalScore: breastQuestions.reduce((sum, q) => sum + q.score, 0),
     status: 'draft',
-    questions: [],
+    questions: breastQuestions,
     createdBy: 'T001',
     createdAt: new Date('2026-03-28'),
   },
@@ -78,10 +112,10 @@ export const mockExams: Exam[] = [
     startTime: new Date('2026-06-20T09:00:00'),
     endTime: new Date('2026-06-20T12:00:00'),
     duration: 180,
-    totalQuestions: 100,
-    totalScore: 100,
+    totalQuestions: comprehensiveQuestions.length,
+    totalScore: comprehensiveQuestions.reduce((sum, q) => sum + q.score, 0),
     status: 'draft',
-    questions: [],
+    questions: comprehensiveQuestions,
     createdBy: 'T001',
     createdAt: new Date('2026-03-20'),
   },

@@ -15,6 +15,10 @@ import {
   GraduationCap,
   FolderOpen,
   Upload,
+  Brain,
+  Network,
+  Target,
+  Sparkles,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -39,6 +43,7 @@ export const mainNavigation: NavItem[] = [
   { title: '切片库', href: '/slices', icon: Microscope },
   { title: '病例资料', href: '/resources', icon: FolderOpen },
   { title: '考试中心', href: '/exams', icon: ClipboardList },
+  { title: '智能分析', href: '/analysis', icon: Brain, roles: ['student'] },
   { title: '讨论', href: '/discussions', icon: MessageSquare },
 ]
 
@@ -109,6 +114,16 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
       { title: '讨论区', href: '/discussions', icon: MessageSquare },
     ],
   },
+  analysis: {
+    title: '智能分析',
+    items: [
+      ...coreNavItems,
+      { title: '分析中心', href: '/analysis', icon: Brain, roles: ['student'] },
+      { title: '智能问答', href: '/analysis/assistant', icon: Sparkles, roles: ['student'] },
+      { title: '知识点分析', href: '/analysis/knowledge', icon: Network, roles: ['student'] },
+      { title: '错题诊断', href: '/analysis/errors', icon: Target, roles: ['student'] },
+    ],
+  },
   'system-settings': {
     title: '系统设置',
     items: [
@@ -146,7 +161,7 @@ export function getCurrentModule(pathname: string): string {
     'progress': 'progress',
     'profile': 'my-learning',
     'account-settings': 'my-learning',
-    'analysis': 'my-learning',
+    'analysis': 'analysis',
     'system-settings': 'system-settings',
     'settings': 'system-settings',
   }

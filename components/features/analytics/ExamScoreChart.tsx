@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,14 +30,53 @@ const examScoreData = [
   { name: '期末', score: 88, average: 79 },
 ]
 
-// 使用 useSyncExternalStore 检测客户端渲染
-const emptySubscribe = () => () => {}
-const getSnapshot = () => true
-const getServerSnapshot = () => false
+// 图表容器组件 - 处理尺寸问题
+function ChartContainer({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const updateDimensions = () => {
+      const { width, height } = container.getBoundingClientRect()
+      if (width > 0 && height > 0) {
+        setDimensions({ width, height })
+      }
+    }
+
+    // 初始测量
+    updateDimensions()
+
+    const observer = new ResizeObserver(() => {
+      updateDimensions()
+    })
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={containerRef} className={className}>
+      {dimensions ? (
+        <ResponsiveContainer width={dimensions.width} height={dimensions.height}>
+          {children}
+        </ResponsiveContainer>
+      ) : (
+        <Skeleton className="w-full h-full" />
+      )}
+    </div>
+  )
+}
 
 export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
-  const mounted = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot)
-
   const latestScore = examScoreData[examScoreData.length - 1].score
   const firstScore = examScoreData[0].score
   const improvement = latestScore - firstScore
@@ -65,59 +104,53 @@ export function ExamScoreChart({ className }: ExamScoreChartProps): ReactNode {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-72">
-          {mounted ? (
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-              <LineChart data={examScoreData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  stroke="#6B7280"
-                />
-                <YAxis
-                  domain={[60, 100]}
-                  tick={{ fontSize: 12 }}
-                  stroke="#6B7280"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1E3A5F',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                  }}
-                />
-                <ReferenceLine
-                  y={80}
-                  stroke="#E86A33"
-                  strokeDasharray="5 5"
-                  label={{ value: '优秀线', fill: '#E86A33', fontSize: 10 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="average"
-                  stroke="#9CA3AF"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={false}
-                  name="班级平均"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="#2D8B8B"
-                  strokeWidth={3}
-                  dot={{ fill: '#2D8B8B', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6 }}
-                  name="我的成绩"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <Skeleton className="w-full h-full" />
-          )}
-        </div>
+        <ChartContainer className="h-72 w-full">
+          <LineChart data={examScoreData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 12 }}
+              stroke="#6B7280"
+            />
+            <YAxis
+              domain={[60, 100]}
+              tick={{ fontSize: 12 }}
+              stroke="#6B7280"
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1E3A5F',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+              }}
+            />
+            <ReferenceLine
+              y={80}
+              stroke="#E86A33"
+              strokeDasharray="5 5"
+              label={{ value: '优秀线', fill: '#E86A33', fontSize: 10 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="average"
+              stroke="#9CA3AF"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+              name="班级平均"
+            />
+            <Line
+              type="monotone"
+              dataKey="score"
+              stroke="#2D8B8B"
+              strokeWidth={3}
+              dot={{ fill: '#2D8B8B', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
+              name="我的成绩"
+            />
+          </LineChart>
+        </ChartContainer>
 
         {/* 图例 */}
         <div className="flex items-center justify-center gap-6 mt-4 text-sm">

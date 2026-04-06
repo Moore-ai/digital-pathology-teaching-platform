@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   BarChart,
@@ -41,14 +41,53 @@ const monthlyData = [
   { month: '6月', score: 88 },
 ]
 
-// 使用 useSyncExternalStore 检测客户端渲染
-const emptySubscribe = () => () => {}
-const getSnapshot = () => true
-const getServerSnapshot = () => false
+// 图表容器组件 - 处理尺寸问题
+function ChartContainer({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const updateDimensions = () => {
+      const { width, height } = container.getBoundingClientRect()
+      if (width > 0 && height > 0) {
+        setDimensions({ width, height })
+      }
+    }
+
+    // 初始测量
+    updateDimensions()
+
+    const observer = new ResizeObserver(() => {
+      updateDimensions()
+    })
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={containerRef} className={className}>
+      {dimensions ? (
+        <ResponsiveContainer width={dimensions.width} height={dimensions.height}>
+          {children}
+        </ResponsiveContainer>
+      ) : (
+        <Skeleton className="w-full h-full" />
+      )}
+    </div>
+  )
+}
 
 export function LearningChart({ className }: LearningChartProps): ReactNode {
-  const mounted = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot)
-
   return (
     <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4", className)}>
       {/* 周学习时长 */}
@@ -57,33 +96,27 @@ export function LearningChart({ className }: LearningChartProps): ReactNode {
           <CardTitle className="text-base font-medium">本周学习时长</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            {mounted ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1E3A5F',
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: '#fff',
-                    }}
-                    formatter={(value) => [`${value} 小时`, '学习时长']}
-                  />
-                  <Bar
-                    dataKey="hours"
-                    fill="#2D8B8B"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Skeleton className="w-full h-full" />
-            )}
-          </div>
+          <ChartContainer className="h-64 w-full">
+            <BarChart data={weeklyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#6B7280" />
+              <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1E3A5F',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+                formatter={(value) => [`${value} 小时`, '学习时长']}
+              />
+              <Bar
+                dataKey="hours"
+                fill="#2D8B8B"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
           <div className="mt-2 text-center">
             <span className="text-2xl font-bold text-primary">18.6</span>
             <span className="text-sm text-muted-foreground ml-1">小时/周</span>
@@ -97,35 +130,29 @@ export function LearningChart({ className }: LearningChartProps): ReactNode {
           <CardTitle className="text-base font-medium">考试成绩趋势</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            {mounted ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <YAxis domain={[60, 100]} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1E3A5F',
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: '#fff',
-                    }}
-                    formatter={(value) => [`${value} 分`, '成绩']}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="#E86A33"
-                    strokeWidth={2}
-                    dot={{ fill: '#E86A33', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <Skeleton className="w-full h-full" />
-            )}
-          </div>
+          <ChartContainer className="h-64 w-full">
+            <LineChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />
+              <YAxis domain={[60, 100]} tick={{ fontSize: 12 }} stroke="#6B7280" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1E3A5F',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+                formatter={(value) => [`${value} 分`, '成绩']}
+              />
+              <Line
+                type="monotone"
+                dataKey="score"
+                stroke="#E86A33"
+                strokeWidth={2}
+                dot={{ fill: '#E86A33', strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ChartContainer>
           <div className="mt-2 text-center">
             <span className="text-sm text-success">↑ 16 分</span>
             <span className="text-sm text-muted-foreground ml-1">较上学期</span>

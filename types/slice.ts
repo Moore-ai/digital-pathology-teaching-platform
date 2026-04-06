@@ -16,6 +16,71 @@ export interface Slice {
   uploadedAt: Date;
 }
 
+// 切片上传状态
+export type SliceUploadStatus =
+  | 'pending'      // 待上传
+  | 'uploading'    // 上传中
+  | 'paused'       // 已暂停
+  | 'processing'   // 处理中
+  | 'success'      // 成功
+  | 'error';       // 失败
+
+// 上传进度信息
+export interface SliceUploadProgress {
+  percent: number;
+  uploadedBytes: number;
+  totalBytes: number;
+  speed?: number;           // MB/s
+  remainingTime?: number;   // 秒
+}
+
+// SVS 元数据
+export interface SVSMetadata {
+  magnification: number;
+  width: number;
+  height: number;
+  mpp?: number;             // Microns Per Pixel
+  vendor?: string;
+  scanner?: string;
+  stainType?: string;
+}
+
+// 切片上传项
+export interface SliceUploadItem {
+  id: string;
+  file: File;
+  status: SliceUploadStatus;
+  progress: SliceUploadProgress;
+
+  // 元数据
+  metadata?: SVSMetadata;
+  title: string;
+  description: string;
+  category: CourseCategory;
+  tags: string[];
+  isPublic: boolean;
+  allowDownload: boolean;
+
+  // 结果
+  sliceId?: string;
+  thumbnailUrl?: string;
+  error?: string;
+
+  // 时间戳
+  createdAt: Date;
+}
+
+// 切片上传表单数据
+export interface SliceFormData {
+  title: string;
+  description: string;
+  category: CourseCategory;
+  magnification: number;
+  tags: string[];
+  isPublic: boolean;
+  allowDownload: boolean;
+}
+
 export interface Annotation {
   id: string;
   type: AnnotationType;

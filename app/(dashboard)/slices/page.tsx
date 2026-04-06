@@ -2,15 +2,21 @@
 
 import type { ReactNode } from 'react'
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { PageWrapper } from '@/components/layout'
 import { SliceCard, SliceCategoryFilter } from '@/components/features/slice'
 import { mockSlices, searchSlices } from '@/lib/mock/slices'
+import { useAuthStore } from '@/stores/authStore'
 import { Input } from '@/components/ui/input'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Search, SlidersHorizontal, Upload } from 'lucide-react'
 
 export default function SlicesPage(): ReactNode {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchKeyword, setSearchKeyword] = useState('')
+  const { user } = useAuthStore()
+
+  const isTeacher = user?.role === 'teacher' || user?.role === 'admin'
 
   // 筛选切片
   const filteredSlices = useMemo(() => {
@@ -32,11 +38,21 @@ export default function SlicesPage(): ReactNode {
   return (
     <PageWrapper className="space-y-6">
       {/* 页面标题 */}
-      <div>
-        <h1 className="text-2xl font-heading font-semibold text-foreground">切片库</h1>
-        <p className="text-muted-foreground mt-1">
-          浏览和管理数字病理切片，支持标注、测量和讨论
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-heading font-semibold text-foreground">切片库</h1>
+          <p className="text-muted-foreground mt-1">
+            浏览和管理数字病理切片，支持标注、测量和讨论
+          </p>
+        </div>
+        {isTeacher && (
+          <Link href="/slices/upload">
+            <Button className="gap-2">
+              <Upload className="w-4 h-4" />
+              上传切片
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* 搜索和筛选 */}

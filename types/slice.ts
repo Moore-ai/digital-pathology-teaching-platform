@@ -97,7 +97,8 @@ export type AnnotationType =
   | 'line'       // 直线测量
   | 'area'       // 区域测量
   | 'point'      // 计数点
-  | 'text';      // 文字标注
+  | 'text'       // 文字标注
+  | 'measure';   // 测量标注
 
 export interface Point {
   x: number;

@@ -32,6 +32,7 @@ const annotationIcons: Record<AnnotationType, typeof Pencil> = {
   area: Ruler,
   point: Hash,
   text: Tag,
+  measure: Ruler,
 }
 
 const annotationLabels: Record<AnnotationType, string> = {
@@ -40,6 +41,7 @@ const annotationLabels: Record<AnnotationType, string> = {
   area: '区域测量',
   point: '计数点',
   text: '文字标注',
+  measure: '测量标注',
 }
 
 export function AnnotationLayer({
@@ -118,11 +120,12 @@ export function AnnotationLayer({
                       {annotation.label || `${annotationLabels[annotation.type]} ${index + 1}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {annotation.type === 'line' && `${(annotation.path.length * 0.5).toFixed(1)} μm`}
-                      {annotation.type === 'area' && `${(annotation.path.length * 0.25).toFixed(1)} μm²`}
+                      {annotation.type === 'line' && (annotation.label || `${(annotation.path.length * 0.5).toFixed(1)} μm`)}
+                      {annotation.type === 'area' && (annotation.label || `${(annotation.path.length * 0.25).toFixed(1)} μm²`)}
                       {annotation.type === 'point' && '计数点'}
                       {annotation.type === 'pen' && `${annotation.path.length} 个点`}
                       {annotation.type === 'text' && annotation.label}
+                      {annotation.type === 'measure' && annotation.label}
                     </p>
                   </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { use } from 'react'
+import { use, useState } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
@@ -32,6 +32,9 @@ export default function SlicePage({ params }: SlicePageProps): ReactNode {
   const { id } = use(params)
   const slice = getSliceById(id)
 
+  // 当前标注颜色
+  const [currentColor, setCurrentColor] = useState('#E86A33')
+
   if (!slice) {
     notFound()
   }
@@ -50,6 +53,9 @@ export default function SlicePage({ params }: SlicePageProps): ReactNode {
     selectAnnotation,
     clearAnnotations,
     undoAnnotation,
+    redoAnnotation,
+    canUndo,
+    canRedo,
   } = useSliceStore()
 
   const categoryLabels: Record<string, string> = {
@@ -83,9 +89,13 @@ export default function SlicePage({ params }: SlicePageProps): ReactNode {
             currentTool={currentTool}
             onToolChange={setTool}
             onUndo={undoAnnotation}
+            onRedo={redoAnnotation}
             onClear={clearAnnotations}
-            canUndo={annotations.length > 0}
+            canUndo={canUndo()}
+            canRedo={canRedo()}
             hasAnnotations={annotations.length > 0}
+            currentColor={currentColor}
+            onColorChange={setCurrentColor}
           />
 
           {/* 标注图层 */}
@@ -110,6 +120,7 @@ export default function SlicePage({ params }: SlicePageProps): ReactNode {
             onZoomChange={setZoom}
             onPositionChange={setPosition}
             onAddAnnotation={addAnnotation}
+            currentColor={currentColor}
           />
         </div>
 

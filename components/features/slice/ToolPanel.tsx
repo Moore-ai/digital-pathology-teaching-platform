@@ -33,6 +33,8 @@ interface ToolPanelProps {
   canUndo?: boolean
   canRedo?: boolean
   hasAnnotations?: boolean
+  currentColor?: string
+  onColorChange?: (color: string) => void
 }
 
 interface ToolItem {
@@ -61,7 +63,19 @@ export function ToolPanel({
   canUndo = false,
   canRedo = false,
   hasAnnotations = false,
+  currentColor,
+  onColorChange,
 }: ToolPanelProps): ReactNode {
+  // 预设颜色
+  const presetColors = [
+    '#E86A33', // 诊断橙
+    '#8B5CF6', // 病理紫
+    '#10B981', // 医疗绿
+    '#3B82F6', // 脑脊液蓝
+    '#EF4444', // 动脉红
+    '#F59E0B', // 胆汁黄
+  ]
+
   return (
     <TooltipProvider>
       <div className={cn("flex flex-col gap-2 p-3 bg-card border rounded-lg", className)}>
@@ -94,6 +108,26 @@ export function ToolPanel({
             )
           })}
         </div>
+
+        {/* 颜色选择器（画笔/测量模式） */}
+        {(currentTool === 'pen' || currentTool === 'measure') && onColorChange && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground px-2 mb-1">颜色</span>
+            <div className="flex flex-wrap gap-1.5 px-2">
+              {presetColors.map((color) => (
+                <button
+                  key={color}
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110",
+                    currentColor === color ? "border-foreground scale-110" : "border-transparent"
+                  )}
+                  style={{ backgroundColor: color }}
+                  onClick={() => onColorChange(color)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         <Separator className="my-2" />
 

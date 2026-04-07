@@ -1,16 +1,21 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
 import { FeatureToggles, UserTable } from '@/components/features/settings'
 import { mockUsers } from '@/lib/mock/users'
 import { useAuthStore } from '@/stores/authStore'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Tabs,
+  Tab,
+  Chip,
+} from '@mui/material'
 import {
   Settings,
   Users,
@@ -24,6 +29,7 @@ export default function SettingsPage(): ReactNode {
   const { user } = useAuthStore()
   const router = useRouter()
   const isAdmin = user?.role === 'admin'
+  const [activeTab, setActiveTab] = useState('features')
 
   // 当用户角色变化时重定向
   useEffect(() => {
@@ -36,132 +42,204 @@ export default function SettingsPage(): ReactNode {
     return null
   }
 
+  const statusCards = [
+    {
+      icon: Server,
+      label: '系统状态',
+      value: '运行正常',
+      color: 'var(--success)',
+      bgColor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+    },
+    {
+      icon: Users,
+      label: '在线用户',
+      value: '23 人',
+      color: 'var(--primary)',
+      bgColor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+    },
+    {
+      icon: Database,
+      label: '存储使用',
+      value: '45.2 GB',
+      color: 'var(--secondary)',
+      bgColor: 'color-mix(in srgb, var(--secondary) 10%, transparent)',
+    },
+    {
+      icon: Activity,
+      label: '今日请求',
+      value: '1,234 次',
+      color: 'var(--warning)',
+      bgColor: 'color-mix(in srgb, var(--warning) 10%, transparent)',
+    },
+  ]
+
+  const logs = [
+    { time: '2026-03-29 14:32:15', user: '管理员', action: '修改功能开关', target: '智能组卷' },
+    { time: '2026-03-29 14:28:03', user: '王老师', action: '上传课程资源', target: '消化病理学' },
+    { time: '2026-03-29 14:15:42', user: '李同学', action: '提交考试', target: '第三单元测试' },
+    { time: '2026-03-29 13:58:20', user: '系统', action: '自动备份', target: '数据库' },
+    { time: '2026-03-29 13:45:11', user: '张同学', action: '登录系统', target: '-' },
+  ]
+
+  const tabs = [
+    { value: 'features', label: '功能设置', icon: <Settings className="w-4 h-4" /> },
+    { value: 'users', label: '用户管理', icon: <Users className="w-4 h-4" /> },
+    { value: 'logs', label: '系统日志', icon: <FileText className="w-4 h-4" /> },
+  ]
+
   return (
     <PageWrapper className="space-y-6">
       {/* 页面标题 */}
-      <div>
-        <h1 className="text-2xl font-heading font-semibold text-foreground">系统设置</h1>
-        <p className="text-muted-foreground mt-1">
+      <Box>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+          系统设置
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
           管理系统配置、用户权限和功能开关
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
       {/* 系统状态概览 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-                <Server className="w-5 h-5 text-success" />
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">系统状态</div>
-                <div className="font-medium text-success">运行正常</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">在线用户</div>
-                <div className="font-medium">23 人</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                <Database className="w-5 h-5 text-secondary" />
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">存储使用</div>
-                <div className="font-medium">45.2 GB</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-amber-500" />
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">今日请求</div>
-                <div className="font-medium">1,234 次</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
+        {statusCards.map((card, index) => (
+          <Paper key={index} sx={{ p: 2, bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  bgcolor: card.bgColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <card.icon className="w-5 h-5" style={{ color: card.color }} />
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                  {card.label}
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500, color: card.color }}>
+                  {card.value}
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        ))}
+      </Box>
 
       {/* 设置标签页 */}
-      <Tabs defaultValue="features">
-        <TabsList>
-          <TabsTrigger value="features" className="gap-2">
-            <Settings className="w-4 h-4" />
-            功能设置
-          </TabsTrigger>
-          <TabsTrigger value="users" className="gap-2">
-            <Users className="w-4 h-4" />
-            用户管理
-          </TabsTrigger>
-          <TabsTrigger value="logs" className="gap-2">
-            <FileText className="w-4 h-4" />
-            系统日志
-          </TabsTrigger>
-        </TabsList>
+      <Box>
+        <Tabs
+          value={activeTab}
+          onChange={(_, value) => setActiveTab(value)}
+          sx={{
+            borderBottom: '1px solid var(--border)',
+            '& .MuiTabs-indicator': { bgcolor: 'var(--primary)' },
+            '& .MuiTab-root': {
+              color: 'var(--muted-foreground)',
+              minHeight: 48,
+              '&.Mui-selected': { color: 'var(--primary)' },
+            },
+          }}
+        >
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.value}
+              value={tab.value}
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </Stack>
+              }
+            />
+          ))}
+        </Tabs>
 
-        <TabsContent value="features" className="mt-6">
-          <FeatureToggles />
-        </TabsContent>
+        {/* 功能设置 */}
+        {activeTab === 'features' && (
+          <Box sx={{ mt: 3 }}>
+            <FeatureToggles />
+          </Box>
+        )}
 
-        <TabsContent value="users" className="mt-6">
-          <UserTable users={mockUsers} currentUserId={user?.id} />
-        </TabsContent>
+        {/* 用户管理 */}
+        {activeTab === 'users' && (
+          <Box sx={{ mt: 3 }}>
+            <UserTable users={mockUsers} currentUserId={user?.id} />
+          </Box>
+        )}
 
-        <TabsContent value="logs" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>系统日志</CardTitle>
-              <CardDescription>查看系统操作日志</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[
-                  { time: '2026-03-29 14:32:15', user: '管理员', action: '修改功能开关', target: '智能组卷', status: 'success' },
-                  { time: '2026-03-29 14:28:03', user: '王老师', action: '上传课程资源', target: '消化病理学', status: 'success' },
-                  { time: '2026-03-29 14:15:42', user: '李同学', action: '提交考试', target: '第三单元测试', status: 'success' },
-                  { time: '2026-03-29 13:58:20', user: '系统', action: '自动备份', target: '数据库', status: 'success' },
-                  { time: '2026-03-29 13:45:11', user: '张同学', action: '登录系统', target: '-', status: 'success' },
-                ].map((log, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground w-40">{log.time}</span>
-                      <span className="font-medium">{log.user}</span>
-                      <span className="text-muted-foreground">{log.action}</span>
-                      <span className="text-secondary">{log.target}</span>
-                    </div>
-                    <Badge variant="outline" className="text-success border-success/20">
-                      成功
-                    </Badge>
-                  </div>
+        {/* 系统日志 */}
+        {activeTab === 'logs' && (
+          <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+            <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                系统日志
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                查看系统操作日志
+              </Typography>
+            </Box>
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {logs.map((log, index) => (
+                  <Stack
+                    key={index}
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 1,
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', width: 160 }}>
+                        {log.time}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                        {log.user}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                        {log.action}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'var(--secondary)' }}>
+                        {log.target}
+                      </Typography>
+                    </Stack>
+                    <Chip
+                      size="small"
+                      label="成功"
+                      sx={{
+                        bgcolor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+                        '& .MuiChip-label': { color: 'var(--success)' },
+                        border: '1px solid color-mix(in srgb, var(--success) 20%, transparent)',
+                      }}
+                    />
+                  </Stack>
                 ))}
-              </div>
-              <div className="flex justify-center mt-4">
-                <Button variant="outline">加载更多</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'var(--muted-foreground)',
+                    cursor: 'pointer',
+                    '&:hover': { color: 'var(--foreground)' },
+                  }}
+                >
+                  加载更多
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        )}
+      </Box>
     </PageWrapper>
   )
 }

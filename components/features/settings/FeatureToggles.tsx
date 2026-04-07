@@ -1,10 +1,14 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
+import {
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Chip,
+  Switch,
+} from '@mui/material'
 
 interface Feature {
   id: string
@@ -55,44 +59,72 @@ export function FeatureToggles({
   }, {} as Record<string, Feature[]>)
 
   return (
-    <Card className={cn("", className)}>
-      <CardHeader>
-        <CardTitle>功能开关</CardTitle>
-        <CardDescription>控制系统功能的开启与关闭</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Paper className={className} sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+          功能开关
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+          控制系统功能的开启与关闭
+        </Typography>
+      </Box>
+      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {Object.entries(groupedFeatures).map(([category, featureList]) => (
-          <div key={category}>
-            <h4 className="text-sm font-medium text-muted-foreground mb-3">
+          <Box key={category}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--muted-foreground)', mb: 1.5 }}>
               {categoryLabels[category as keyof typeof categoryLabels]}
-            </h4>
-            <div className="space-y-4">
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {featureList.map((feature) => (
-                <div
+                <Stack
                   key={feature.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 1,
+                    border: '1px solid var(--border)',
+                  }}
                 >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{feature.name}</span>
-                      {feature.enabled ? (
-                        <Badge variant="secondary" className="text-xs bg-success/10 text-success">已开启</Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-xs">已关闭</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </div>
+                  <Box>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.25 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                        {feature.name}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={feature.enabled ? '已开启' : '已关闭'}
+                        sx={{
+                          height: 20,
+                          fontSize: '0.625rem',
+                          bgcolor: feature.enabled
+                            ? 'color-mix(in srgb, var(--success) 10%, transparent)'
+                            : 'var(--muted)',
+                          '& .MuiChip-label': {
+                            color: feature.enabled ? 'var(--success)' : 'var(--muted-foreground)',
+                          },
+                        }}
+                      />
+                    </Stack>
+                    <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                      {feature.description}
+                    </Typography>
+                  </Box>
                   <Switch
                     checked={feature.enabled}
-                    onCheckedChange={(checked) => onToggle?.(feature.id, checked)}
+                    onChange={(e) => onToggle?.(feature.id, e.target.checked)}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--primary)' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: 'var(--primary)' },
+                    }}
                   />
-                </div>
+                </Stack>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ))}
-      </CardContent>
-    </Card>
+      </Box>
+    </Paper>
   )
 }

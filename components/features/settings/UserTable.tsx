@@ -1,27 +1,30 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { useState } from 'react'
 import { User } from '@/types/user'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Chip,
+  Button,
+  TextField,
+  Avatar,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
-  TableHeader,
   TableRow,
-} from '@/components/ui/table'
+  TablePagination,
+  Menu,
+  MenuItem,
+  Divider,
+  IconButton,
+  InputAdornment,
+} from '@mui/material'
 import {
   Search,
   Plus,
@@ -31,13 +34,6 @@ import {
   Trash2,
   Ban,
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 interface UserTableProps {
   className?: string
@@ -45,124 +41,248 @@ interface UserTableProps {
   currentUserId?: string
 }
 
-const roleLabels: Record<string, { label: string; color: string }> = {
-  student: { label: '学生', color: 'bg-blue-100 text-blue-800' },
-  teacher: { label: '教师', color: 'bg-amber-100 text-amber-800' },
-  admin: { label: '管理员', color: 'bg-purple-100 text-purple-800' },
+const roleConfig: Record<string, { label: string; color: string; bgColor: string }> = {
+  student: { label: '学生', color: 'var(--info)', bgColor: 'color-mix(in srgb, var(--info) 10%, transparent)' },
+  teacher: { label: '教师', color: 'var(--warning)', bgColor: 'color-mix(in srgb, var(--warning) 10%, transparent)' },
+  admin: { label: '管理员', color: 'var(--secondary)', bgColor: 'color-mix(in srgb, var(--secondary) 10%, transparent)' },
 }
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  active: { label: '正常', color: 'bg-success/10 text-success' },
-  inactive: { label: '禁用', color: 'bg-destructive/10 text-destructive' },
+const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
+  active: { label: '正常', color: 'var(--success)', bgColor: 'color-mix(in srgb, var(--success) 10%, transparent)' },
+  inactive: { label: '禁用', color: 'var(--error)', bgColor: 'color-mix(in srgb, var(--error) 10%, transparent)' },
 }
 
 export function UserTable({ className, users, currentUserId }: UserTableProps): ReactNode {
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
   return (
-    <Card className={cn("", className)}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>用户管理</CardTitle>
-            <CardDescription>管理系统用户账号</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
+    <Paper className={className} sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+              用户管理
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              管理系统用户账号
+            </Typography>
+          </Box>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{
+                borderColor: 'var(--border)',
+                color: 'var(--foreground)',
+                '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+              }}
+            >
+              <Download className="w-4 h-4" style={{ marginRight: 8 }} />
               导出
             </Button>
-            <Button size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ bgcolor: 'var(--primary)', '&:hover': { bgcolor: 'var(--primary)', opacity: 0.9 } }}
+            >
+              <Plus className="w-4 h-4" style={{ marginRight: 8 }} />
               添加用户
             </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
+          </Stack>
+        </Stack>
+      </Box>
+      <Box sx={{ p: 2 }}>
         {/* 搜索栏 */}
-        <div className="flex items-center gap-4 mb-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="搜索用户..." className="pl-10" />
-          </div>
-        </div>
+        <TextField
+          size="small"
+          placeholder="搜索用户..."
+          sx={{
+            width: { xs: '100%', sm: 300 },
+            mb: 2,
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'var(--background)',
+              '& fieldset': { borderColor: 'var(--border)' },
+              '&:hover fieldset': { borderColor: 'var(--border)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& .MuiInputBase-input': { color: 'var(--foreground)' },
+            '& .MuiInputBase-input::placeholder': { color: 'var(--muted-foreground)', opacity: 1 },
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
 
         {/* 用户表格 */}
-        <div className="border rounded-lg">
+        <TableContainer sx={{ border: '1px solid var(--border)', borderRadius: 1 }}>
           <Table>
-            <TableHeader>
+            <TableHead>
               <TableRow>
-                <TableHead>用户</TableHead>
-                <TableHead>角色</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead>注册时间</TableHead>
-                <TableHead className="text-right">操作</TableHead>
+                <TableCell sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>用户</TableCell>
+                <TableCell sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>角色</TableCell>
+                <TableCell sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>状态</TableCell>
+                <TableCell sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>注册时间</TableCell>
+                <TableCell align="right" sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>操作</TableCell>
               </TableRow>
-            </TableHeader>
+            </TableHead>
             <TableBody>
-              {users.map((user) => {
-                const role = roleLabels[user.role]
-                const status = statusLabels[user.status || 'active']
-                const isCurrentUser = user.id === currentUserId
+              {users
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((user) => {
+                  const role = roleConfig[user.role]
+                  const status = statusConfig[user.status || 'active']
+                  const isCurrentUser = user.id === currentUserId
 
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={user.avatar} />
-                          <AvatarFallback>{user.name.slice(0, 1)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {user.name}
-                            {isCurrentUser && (
-                              <Badge variant="outline" className="ml-2 text-xs">当前</Badge>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={role.color}>{role.label}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={status.color}>{status.label}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {user.createdAt.toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        } />
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2">
-                            <Edit className="w-4 h-4" />
-                            编辑
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="gap-2 text-destructive">
-                            <Ban className="w-4 h-4" />
-                            禁用
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-destructive">
-                            <Trash2 className="w-4 h-4" />
-                            删除
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                  return (
+                    <TableRow
+                      key={user.id}
+                      sx={{
+                        '&:hover': { bgcolor: 'var(--muted)' },
+                        '& td': { borderColor: 'var(--border)' },
+                      }}
+                    >
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1.5}>
+                          <Avatar
+                            src={user.avatar}
+                            sx={{ width: 36, height: 36, bgcolor: 'var(--primary)' }}
+                          >
+                            {user.name.slice(0, 1)}
+                          </Avatar>
+                          <Box>
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                                {user.name}
+                              </Typography>
+                              {isCurrentUser && (
+                                <Chip
+                                  size="small"
+                                  label="当前"
+                                  sx={{
+                                    height: 20,
+                                    fontSize: '0.625rem',
+                                    bgcolor: 'var(--muted)',
+                                    '& .MuiChip-label': { color: 'var(--foreground)' },
+                                  }}
+                                />
+                              )}
+                            </Stack>
+                            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                              {user.email}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={role.label}
+                          sx={{
+                            bgcolor: role.bgColor,
+                            '& .MuiChip-label': { color: role.color },
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={status.label}
+                          sx={{
+                            bgcolor: status.bgColor,
+                            '& .MuiChip-label': { color: status.color },
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: 'var(--muted-foreground)' }}>
+                        {user.createdAt.toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e)}
+                          sx={{ color: 'var(--muted-foreground)' }}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
             </TableBody>
           </Table>
-        </div>
-      </CardContent>
-    </Card>
+        </TableContainer>
+        <TablePagination
+          component="div"
+          count={users.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="每页行数"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} 共 ${count} 条`}
+          sx={{
+            color: 'var(--muted-foreground)',
+            '& .MuiTablePagination-toolbar': { color: 'var(--foreground)' },
+            '& .MuiTablePagination-select': { color: 'var(--foreground)' },
+            '& .MuiTablePagination-selectIcon': { color: 'var(--muted-foreground)' },
+          }}
+        />
+      </Box>
+
+      {/* 操作菜单 */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{
+          '& .MuiPaper-root': {
+            bgcolor: 'var(--card)',
+            border: '1px solid var(--border)',
+            minWidth: 120,
+          },
+        }}
+      >
+        <MenuItem onClick={handleMenuClose} sx={{ gap: 1.5, color: 'var(--foreground)' }}>
+          <Edit className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+          编辑
+        </MenuItem>
+        <Divider sx={{ borderColor: 'var(--border)' }} />
+        <MenuItem onClick={handleMenuClose} sx={{ gap: 1.5, color: 'var(--error)' }}>
+          <Ban className="w-4 h-4" />
+          禁用
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ gap: 1.5, color: 'var(--error)' }}>
+          <Trash2 className="w-4 h-4" />
+          删除
+        </MenuItem>
+      </Menu>
+    </Paper>
   )
 }

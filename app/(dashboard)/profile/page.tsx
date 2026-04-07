@@ -3,11 +3,16 @@
 import type { ReactNode } from 'react'
 import { PageWrapper } from '@/components/layout'
 import { useAuthStore } from '@/stores/authStore'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import {
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Avatar,
+  Chip,
+  Button,
+  TextField,
+} from '@mui/material'
 import { ROLES } from '@/lib/constants'
 import {
   User,
@@ -27,161 +32,275 @@ export default function ProfilePage(): ReactNode {
   if (!user) {
     return (
       <PageWrapper className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-        <Card className="w-full max-w-md">
-          <div className="p-6 text-center">
-            <p className="text-muted-foreground">请先登录</p>
-          </div>
-        </Card>
+        <Paper sx={{ width: '100%', maxWidth: 400, p: 3, textAlign: 'center', bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+          <Typography sx={{ color: 'var(--muted-foreground)' }}>请先登录</Typography>
+        </Paper>
       </PageWrapper>
     )
+  }
+
+  // TextField 样式
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      bgcolor: 'var(--background)',
+      '& fieldset': { borderColor: 'var(--border)' },
+      '&:hover fieldset': { borderColor: 'var(--border)' },
+      '&.Mui-disabled fieldset': { borderColor: 'var(--border)' },
+    },
+    '& .MuiInputBase-input': { color: 'var(--foreground)' },
+    '& .MuiInputBase-input.Mui-disabled': {
+      WebkitTextFillColor: 'var(--foreground)',
+      color: 'var(--foreground)',
+    },
   }
 
   return (
     <PageWrapper className="space-y-6">
       {/* 页面标题 */}
-      <div>
-        <h1 className="text-2xl font-heading font-semibold text-foreground">个人中心</h1>
-        <p className="text-muted-foreground mt-1">
+      <Box>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+          个人中心
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
           查看和管理您的个人信息
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 2fr' }, gap: 3 }}>
         {/* 左侧：个人信息卡片 */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="text-center">
-            <Avatar className="w-24 h-24 mx-auto mb-4">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-2xl">{user.name?.slice(0, 1)}</AvatarFallback>
+        <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+          <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid var(--border)' }}>
+            <Avatar
+              src={user.avatar}
+              sx={{
+                width: 96,
+                height: 96,
+                mx: 'auto',
+                mb: 2,
+                bgcolor: 'var(--primary)',
+                fontSize: '2rem',
+              }}
+            >
+              {user.name?.slice(0, 1)}
             </Avatar>
-            <CardTitle className="text-xl">{user.name}</CardTitle>
-            <CardDescription>{user.email}</CardDescription>
-            <div className="mt-2">
-              <Badge className="bg-primary/10 text-primary">
-                {ROLES[user.role]}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 text-sm">
-              <Building className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">所属机构：</span>
-              <span>病理学系</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">注册时间：</span>
-              <span>2024-09-01</span>
-            </div>
-          </CardContent>
-        </Card>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+              {user.name}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
+              {user.email}
+            </Typography>
+            <Box sx={{ mt: 1.5 }}>
+              <Chip
+                size="small"
+                label={ROLES[user.role]}
+                sx={{
+                  bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+                  '& .MuiChip-label': { color: 'var(--primary)' },
+                }}
+              />
+            </Box>
+          </Box>
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Building className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                所属机构：
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>
+                病理学系
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Calendar className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                注册时间：
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>
+                2024-09-01
+              </Typography>
+            </Stack>
+          </Box>
+        </Paper>
 
         {/* 右侧：详细信息 */}
-        <div className="lg:col-span-2 space-y-6">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* 基本信息 */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">基本信息</CardTitle>
-                <Button variant="ghost" size="sm" className="gap-1">
-                  <Edit2 className="w-4 h-4" />
+          <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+            <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                  基本信息
+                </Typography>
+                <Button
+                  size="small"
+                  sx={{
+                    color: 'var(--muted-foreground)',
+                    '&:hover': { bgcolor: 'var(--muted)' },
+                  }}
+                >
+                  <Edit2 className="w-4 h-4" style={{ marginRight: 4 }} />
                   编辑
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm text-muted-foreground flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    姓名
-                  </label>
-                  <Input value={user.name} disabled />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    邮箱
-                  </label>
-                  <Input value={user.email} disabled />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    手机号
-                  </label>
-                  <Input value="138****8888" disabled />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    角色
-                  </label>
-                  <Input value={ROLES[user.role]} disabled />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </Stack>
+            </Box>
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <User className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                      姓名
+                    </Typography>
+                  </Stack>
+                  <TextField fullWidth size="small" value={user.name} disabled sx={textFieldSx} />
+                </Box>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <Mail className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                      邮箱
+                    </Typography>
+                  </Stack>
+                  <TextField fullWidth size="small" value={user.email} disabled sx={textFieldSx} />
+                </Box>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <Phone className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                      手机号
+                    </Typography>
+                  </Stack>
+                  <TextField fullWidth size="small" value="138****8888" disabled sx={textFieldSx} />
+                </Box>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                    <Shield className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} />
+                    <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                      角色
+                    </Typography>
+                  </Stack>
+                  <TextField fullWidth size="small" value={ROLES[user.role]} disabled sx={textFieldSx} />
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
 
           {/* 安全设置 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">安全设置</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <Key className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="font-medium">登录密码</div>
-                    <div className="text-sm text-muted-foreground">定期更换密码可以提高账号安全性</div>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">修改</Button>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="font-medium">消息通知</div>
-                    <div className="text-sm text-muted-foreground">管理系统通知和邮件提醒</div>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">设置</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+            <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                安全设置
+              </Typography>
+            </Box>
+            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Key className="w-5 h-5" style={{ color: 'var(--muted-foreground)' }} />
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                      登录密码
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                      定期更换密码可以提高账号安全性
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    borderColor: 'var(--border)',
+                    color: 'var(--foreground)',
+                    '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+                  }}
+                >
+                  修改
+                </Button>
+              </Stack>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Bell className="w-5 h-5" style={{ color: 'var(--muted-foreground)' }} />
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                      消息通知
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                      管理系统通知和邮件提醒
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    borderColor: 'var(--border)',
+                    color: 'var(--foreground)',
+                    '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+                  }}
+                >
+                  设置
+                </Button>
+              </Stack>
+            </Box>
+          </Paper>
 
           {/* 学习统计（仅学生） */}
           {user.role === 'student' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">学习统计</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-primary">12</div>
-                    <div className="text-sm text-muted-foreground">已完成课程</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-secondary">86</div>
-                    <div className="text-sm text-muted-foreground">学习小时</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-accent">24</div>
-                    <div className="text-sm text-muted-foreground">查看切片</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-success">92</div>
-                    <div className="text-sm text-muted-foreground">平均分数</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+              <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                  学习统计
+                </Typography>
+              </Box>
+              <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 2 }}>
+                  {[
+                    { value: '12', label: '已完成课程', color: 'var(--primary)' },
+                    { value: '86', label: '学习小时', color: 'var(--secondary)' },
+                    { value: '24', label: '查看切片', color: 'var(--accent)' },
+                    { value: '92', label: '平均分数', color: 'var(--success)' },
+                  ].map((stat, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        textAlign: 'center',
+                        p: 1.5,
+                        borderRadius: 1,
+                        bgcolor: 'color-mix(in srgb, var(--muted) 50%, transparent)',
+                      }}
+                    >
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: stat.color }}>
+                        {stat.value}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                        {stat.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Paper>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
     </PageWrapper>
   )
 }

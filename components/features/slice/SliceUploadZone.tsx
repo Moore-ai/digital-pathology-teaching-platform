@@ -2,8 +2,14 @@
 
 import type { ReactNode } from 'react'
 import { useState, useCallback, useRef } from 'react'
-import { cn } from '@/lib/utils'
-import { Microscope, Upload, FileImage, AlertCircle } from 'lucide-react'
+import {
+  Box,
+  Typography,
+  Stack,
+  Button,
+  CircularProgress,
+} from '@mui/material'
+import { Microscope, Upload, AlertCircle } from 'lucide-react'
 
 interface SliceUploadZoneProps {
   onFilesSelect: (files: File[]) => void
@@ -94,115 +100,185 @@ export function SliceUploadZone({
     e.target.value = ''
   }, [handleFiles])
 
+  // 获取边框颜色
+  const getBorderColor = () => {
+    if (validationError) return 'var(--error)'
+    if (isDragging) return 'var(--primary)'
+    return 'var(--border)'
+  }
+
   return (
-    <div className={cn('relative', className)}>
-      <div
+    <Box className={className} sx={{ position: 'relative' }}>
+      <Box
         onClick={handleClick}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={cn(
-          'relative flex flex-col items-center justify-center py-16 px-8',
-          'border-2 border-dashed rounded-xl cursor-pointer',
-          'transition-all duration-300 ease-out',
-          // 默认状态 - 玻片质感
-          !isDragging && !validationError && 'border-slate-300 dark:border-slate-600',
-          'bg-gradient-to-br from-slate-50 via-white to-slate-100',
-          'dark:from-slate-900 dark:via-slate-800 dark:to-slate-900',
-          // 悬停/拖拽状态
-          isDragging && 'border-primary bg-primary/5 scale-[1.02]',
-          // 错误状态
-          validationError && 'border-error/50 bg-error/5',
-          // 验证中
-          isValidating && 'pointer-events-none opacity-70'
-        )}
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 8,
+          px: 4,
+          border: '2px dashed',
+          borderColor: getBorderColor(),
+          borderRadius: 3,
+          cursor: isValidating ? 'wait' : 'pointer',
+          bgcolor: isDragging
+            ? 'color-mix(in srgb, var(--primary) 5%, transparent)'
+            : 'var(--card)',
+          transition: 'all 0.2s',
+          transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+          opacity: isValidating ? 0.7 : 1,
+          '&:hover': {
+            borderColor: validationError ? 'var(--error)' : 'var(--primary)',
+          },
+        }}
       >
         {/* 玻片内部纹理 */}
-        <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-48 h-36 rounded-full bg-pink-100/30 dark:bg-pink-900/20 blur-2xl" />
-          <div className="absolute top-1/2 right-1/4 w-36 h-28 rounded-full bg-purple-100/20 dark:bg-purple-900/20 blur-2xl" />
-          <div className="absolute bottom-1/3 left-1/2 w-40 h-40 rounded-full bg-rose-100/25 dark:bg-rose-900/20 blur-2xl" />
-        </div>
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'hidden',
+            borderRadius: 3,
+            pointerEvents: 'none',
+          }}
+        >
+          <Box sx={{ position: 'absolute', top: '25%', left: '25%', width: 192, height: 144, borderRadius: '50%', bgcolor: 'color-mix(in srgb, var(--primary) 5%, transparent)', filter: 'blur(40px)' }} />
+          <Box sx={{ position: 'absolute', top: '50%', right: '25%', width: 144, height: 112, borderRadius: '50%', bgcolor: 'color-mix(in srgb, var(--secondary) 5%, transparent)', filter: 'blur(40px)' }} />
+        </Box>
 
         {/* 玻片边框效果 */}
-        <div className="absolute inset-6 border border-slate-200/50 dark:border-slate-700/50 rounded-lg pointer-events-none" />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 3,
+            border: '1px solid var(--border)',
+            borderRadius: 2,
+            pointerEvents: 'none',
+            opacity: 0.5,
+          }}
+        />
 
         {/* 内容 */}
-        <div className="relative z-10 flex flex-col items-center">
+        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* 图标 */}
-          <div className={cn(
-            'w-20 h-20 rounded-full flex items-center justify-center mb-6',
-            'bg-gradient-to-br from-primary/10 to-secondary/10',
-            'transition-transform duration-300',
-            isDragging && 'scale-110'
-          )}>
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 3,
+              bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+              transition: 'transform 0.2s',
+              transform: isDragging ? 'scale(1.1)' : 'scale(1)',
+            }}
+          >
             {validationError ? (
-              <AlertCircle className="w-10 h-10 text-error" />
+              <AlertCircle className="w-10 h-10" style={{ color: 'var(--error)' }} />
             ) : isValidating ? (
-              <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <CircularProgress size={40} sx={{ color: 'var(--primary)' }} />
             ) : (
-              <Microscope className={cn(
-                'w-10 h-10 text-primary transition-all duration-300',
-                isDragging && 'scale-110 text-secondary'
-              )} />
+              <Microscope
+                className="w-10 h-10"
+                style={{
+                  color: isDragging ? 'var(--secondary)' : 'var(--primary)',
+                  transition: 'color 0.2s',
+                }}
+              />
             )}
-          </div>
+          </Box>
 
           {/* 文字 */}
-          <div className="text-center">
+          <Box sx={{ textAlign: 'center' }}>
             {validationError ? (
               <>
-                <p className="text-lg font-medium text-error mb-2">
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 500, color: 'var(--error)', mb: 1 }}>
                   文件格式错误
-                </p>
-                <p className="text-sm text-error/70">{validationError}</p>
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'var(--error)', opacity: 0.7 }}>
+                  {validationError}
+                </Typography>
               </>
             ) : isValidating ? (
-              <p className="text-lg font-medium text-muted-foreground">
+              <Typography sx={{ fontSize: '1.125rem', fontWeight: 500, color: 'var(--muted-foreground)' }}>
                 正在验证文件...
-              </p>
+              </Typography>
             ) : (
               <>
-                <p className={cn(
-                  'text-xl font-medium text-foreground mb-3',
-                  'transition-colors duration-300',
-                  isDragging && 'text-primary'
-                )}>
+                <Typography
+                  sx={{
+                    fontSize: '1.25rem',
+                    fontWeight: 500,
+                    color: isDragging ? 'var(--primary)' : 'var(--foreground)',
+                    mb: 1.5,
+                    transition: 'color 0.2s',
+                  }}
+                >
                   {isDragging ? '松开以上传切片' : '将 SVS 切片文件拖拽到此处'}
-                </p>
+                </Typography>
 
-                <div className="flex items-center gap-3 mb-4 w-full max-w-xs mx-auto">
-                  <div className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
-                  <span className="text-sm text-muted-foreground shrink-0">或</span>
-                  <div className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
-                </div>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1.5}
+                  sx={{
+                    width: '100%',
+                    maxWidth: 300,
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
+                  <Box sx={{ height: 1, flex: 1, bgcolor: 'var(--border)' }} />
+                  <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                    或
+                  </Typography>
+                  <Box sx={{ height: 1, flex: 1, bgcolor: 'var(--border)' }} />
+                </Stack>
 
-                <div className={cn(
-                  'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg',
-                  'bg-primary text-primary-foreground',
-                  'hover:bg-primary/90 transition-colors',
-                  'shadow-sm'
-                )}>
-                  <Upload className="w-4 h-4" />
-                  <span className="font-medium">选择文件</span>
-                </div>
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
+                    '&:hover': { bgcolor: 'var(--primary)', opacity: 0.9 },
+                    boxShadow: 1,
+                  }}
+                >
+                  <Upload className="w-4 h-4" style={{ marginRight: 8 }} />
+                  选择文件
+                </Button>
 
-                <p className="mt-6 text-sm text-muted-foreground">
-                  支持 <span className="font-medium text-foreground">.svs</span> 格式 ·
-                  单文件最大 <span className="font-medium text-foreground">5GB</span> ·
+                <Typography variant="body2" sx={{ mt: 3, color: 'var(--muted-foreground)' }}>
+                  支持 <Box component="span" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>.svs</Box> 格式 ·
+                  单文件最大 <Box component="span" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>5GB</Box> ·
                   批量上传
-                </p>
+                </Typography>
               </>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* 拖拽时的叠加效果 */}
         {isDragging && (
-          <div className="absolute inset-0 bg-primary/5 rounded-xl pointer-events-none" />
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              bgcolor: 'color-mix(in srgb, var(--primary) 5%, transparent)',
+              borderRadius: 3,
+              pointerEvents: 'none',
+            }}
+          />
         )}
-      </div>
+      </Box>
 
       {/* 隐藏的文件输入 */}
       <input
@@ -211,8 +287,8 @@ export function SliceUploadZone({
         accept=".svs"
         multiple
         onChange={handleInputChange}
-        className="hidden"
+        style={{ display: 'none' }}
       />
-    </div>
+    </Box>
   )
 }

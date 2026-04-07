@@ -7,27 +7,25 @@ import { useRouter } from 'next/navigation'
 import { PageWrapper } from '@/components/layout'
 import { SliceUploadZone, SliceUploadItem, SliceEditForm } from '@/components/features/slice'
 import { useSliceUploadStore } from '@/stores/sliceUploadStore'
-import { useAuthStore } from '@/stores/authStore'
 import { SliceFormData } from '@/types/slice'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Button,
+  Modal,
+  IconButton,
+} from '@mui/material'
 import { ArrowLeft, Upload, Trash2, Play, Pause } from 'lucide-react'
 
 export default function SliceUploadPage(): ReactNode {
   const router = useRouter()
-  const { user } = useAuthStore()
   const {
     queue,
     addToQueue,
     removeFromQueue,
     updateFormData,
-    startUpload,
     pauseUpload,
     resumeUpload,
     retryUpload,
@@ -80,85 +78,131 @@ export default function SliceUploadPage(): ReactNode {
   return (
     <PageWrapper className="space-y-6">
       {/* 页面标题 */}
-      <div className="flex items-center gap-4">
-        <Link href="/slices" className="text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+      <Stack direction="row" alignItems="flex-start" spacing={2}>
+        <Link href="/slices">
+          <IconButton
+            size="small"
+            sx={{
+              color: 'var(--muted-foreground)',
+              '&:hover': { color: 'var(--foreground)' },
+            }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </IconButton>
         </Link>
-        <div>
-          <h1 className="text-2xl font-heading font-semibold text-foreground">上传切片</h1>
-          <p className="text-muted-foreground mt-1">
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+            上传切片
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
             将 SVS 数字病理切片添加到切片库
-          </p>
-        </div>
-      </div>
+          </Typography>
+        </Box>
+      </Stack>
 
       {/* 上传区域 */}
-      <Card>
-        <CardContent className="pt-6">
-          <SliceUploadZone onFilesSelect={handleFilesSelect} />
-        </CardContent>
-      </Card>
+      <Paper sx={{ p: 3, bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+        <SliceUploadZone onFilesSelect={handleFilesSelect} />
+      </Paper>
 
       {/* 上传队列 */}
       {queue.length > 0 && (
-        <Card>
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Upload className="w-5 h-5" />
-                上传队列
-                <span className="text-muted-foreground font-normal">
+        <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+          {/* 队列头部 */}
+          <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Upload className="w-5 h-5" style={{ color: 'var(--muted-foreground)' }} />
+                <Typography variant="h6" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                  上传队列
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
                   ({queue.length})
-                </span>
-              </CardTitle>
-              <div className="flex items-center gap-2">
+                </Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" spacing={1}>
                 {/* 状态统计 */}
-                <div className="flex items-center gap-3 text-sm text-muted-foreground mr-4">
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mr: 2 }}>
                   {pendingCount > 0 && (
-                    <span>待上传 {pendingCount}</span>
+                    <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                      待上传 {pendingCount}
+                    </Typography>
                   )}
                   {uploadingCount > 0 && (
-                    <span className="text-primary">上传中 {uploadingCount}</span>
+                    <Typography variant="body2" sx={{ color: 'var(--primary)' }}>
+                      上传中 {uploadingCount}
+                    </Typography>
                   )}
                   {pausedCount > 0 && (
-                    <span className="text-warning">已暂停 {pausedCount}</span>
+                    <Typography variant="body2" sx={{ color: 'var(--warning)' }}>
+                      已暂停 {pausedCount}
+                    </Typography>
                   )}
                   {completedCount > 0 && (
-                    <span className="text-success">已完成 {completedCount}</span>
+                    <Typography variant="body2" sx={{ color: 'var(--success)' }}>
+                      已完成 {completedCount}
+                    </Typography>
                   )}
-                </div>
+                </Stack>
 
                 {/* 批量操作 */}
                 {pendingCount > 0 && (
-                  <Button size="sm" onClick={uploadAll} className="gap-2">
-                    <Play className="w-4 h-4" />
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={uploadAll}
+                    sx={{ bgcolor: 'var(--primary)', '&:hover': { bgcolor: 'var(--primary)' } }}
+                  >
+                    <Play className="w-4 h-4" style={{ marginRight: 4 }} />
                     全部上传
                   </Button>
                 )}
                 {uploadingCount > 0 && (
-                  <Button size="sm" variant="outline" onClick={pauseAll} className="gap-2">
-                    <Pause className="w-4 h-4" />
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={pauseAll}
+                    sx={{
+                      borderColor: 'var(--border)',
+                      color: 'var(--foreground)',
+                      '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+                    }}
+                  >
+                    <Pause className="w-4 h-4" style={{ marginRight: 4 }} />
                     全部暂停
                   </Button>
                 )}
                 {completedCount > 0 && (
-                  <Button size="sm" variant="outline" onClick={clearCompleted}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={clearCompleted}
+                    sx={{
+                      borderColor: 'var(--border)',
+                      color: 'var(--foreground)',
+                      '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+                    }}
+                  >
                     清除已完成
                   </Button>
                 )}
                 <Button
-                  size="sm"
-                  variant="ghost"
+                  size="small"
+                  sx={{
+                    color: 'var(--muted-foreground)',
+                    '&:hover': { bgcolor: 'var(--muted)' },
+                  }}
                   onClick={clearAll}
-                  className="gap-2 text-muted-foreground"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" style={{ marginRight: 4 }} />
                   清空
                 </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+              </Stack>
+            </Stack>
+          </Box>
+
+          {/* 队列列表 */}
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {queue.map((item) => (
               <SliceUploadItem
                 key={item.id}
@@ -176,45 +220,83 @@ export default function SliceUploadPage(): ReactNode {
                 }
               />
             ))}
-          </CardContent>
-        </Card>
+          </Box>
+        </Paper>
       )}
 
       {/* 使用提示 */}
       {queue.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="py-8">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                SVS 文件是数字病理切片的标准格式，通常包含多分辨率层级的显微镜图像。
-              </p>
-              <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                <div>
-                  <div className="font-medium text-foreground">支持格式</div>
-                  <div>.svs</div>
-                </div>
-                <div>
-                  <div className="font-medium text-foreground">文件大小</div>
-                  <div>最大 5GB</div>
-                </div>
-                <div>
-                  <div className="font-medium text-foreground">上传方式</div>
-                  <div>拖拽或点击选择</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Paper
+          sx={{
+            p: 3,
+            border: '1px dashed var(--border)',
+            bgcolor: 'var(--card)',
+          }}
+        >
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mb: 2 }}>
+              SVS 文件是数字病理切片的标准格式，通常包含多分辨率层级的显微镜图像。
+            </Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              spacing={3}
+              sx={{ color: 'var(--muted-foreground)' }}
+            >
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                  支持格式
+                </Typography>
+                <Typography variant="body2">.svs</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                  文件大小
+                </Typography>
+                <Typography variant="body2">最大 5GB</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                  上传方式
+                </Typography>
+                <Typography variant="body2">拖拽或点击选择</Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
       )}
 
       {/* 编辑对话框 */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>编辑切片信息</DialogTitle>
-          </DialogHeader>
+      <Modal
+        open={showEditDialog}
+        onClose={() => {
+          setShowEditDialog(false)
+          setEditingItemId(null)
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: 500 },
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            bgcolor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 3,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--foreground)', mb: 2 }}>
+            编辑切片信息
+          </Typography>
           {editingItem && (
             <SliceEditForm
+              key={editingItem.id}
               item={editingItem}
               onSave={handleSaveEdit}
               onCancel={() => {
@@ -223,8 +305,8 @@ export default function SliceUploadPage(): ReactNode {
               }}
             />
           )}
-        </DialogContent>
-      </Dialog>
+        </Box>
+      </Modal>
     </PageWrapper>
   )
 }

@@ -1,24 +1,22 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils'
+import { useState } from 'react'
+import {
+  Box,
+  Typography,
+  Stack,
+  TextField,
+  Button,
+  Chip,
+  FormControl,
+  Select,
+  MenuItem,
+  Switch,
+  Divider,
+} from '@mui/material'
 import { SliceUploadItem, SliceFormData } from '@/types/slice'
 import { CourseCategory } from '@/types/course'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
 import { X, Plus, FileImage } from 'lucide-react'
 
 interface SliceEditFormProps {
@@ -63,20 +61,7 @@ export function SliceEditForm({
 
   const [newTag, setNewTag] = useState('')
 
-  // 更新表单数据当item变化时
-  useEffect(() => {
-    setFormData({
-      title: item.title,
-      description: item.description,
-      category: item.category,
-      magnification: item.metadata?.magnification || 40,
-      tags: item.tags,
-      isPublic: item.isPublic,
-      allowDownload: item.allowDownload,
-    })
-  }, [item])
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     onSave(formData)
   }
@@ -106,203 +91,304 @@ export function SliceEditForm({
     }
   }
 
+  // TextField 样式
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      bgcolor: 'var(--background)',
+      '& fieldset': { borderColor: 'var(--border)' },
+      '&:hover fieldset': { borderColor: 'var(--border)' },
+      '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+    },
+    '& .MuiInputBase-input': { color: 'var(--foreground)' },
+    '& .MuiInputBase-input::placeholder': { color: 'var(--muted-foreground)', opacity: 1 },
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* 文件信息 */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <FileImage className="w-5 h-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1.5}
+        sx={{
+          p: 1.5,
+          borderRadius: 1,
+          bgcolor: 'color-mix(in srgb, var(--muted) 50%, transparent)',
+        }}
+      >
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 1,
+            bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <FileImage className="w-5 h-5" style={{ color: 'var(--primary)' }} />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+              color: 'var(--foreground)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {item.file.name}
-          </p>
-          <p className="text-xs text-muted-foreground">
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
             {(item.file.size / 1024 / 1024).toFixed(1)} MB
-          </p>
-        </div>
-      </div>
+          </Typography>
+        </Box>
+      </Stack>
 
       {/* 标题 */}
-      <div className="space-y-2">
-        <Label htmlFor="title">
-          切片标题 <span className="text-error">*</span>
-        </Label>
-        <Input
+      <Box>
+        <Typography
+          component="label"
+          htmlFor="title"
+          variant="body2"
+          sx={{ display: 'block', mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}
+        >
+          切片标题 <Box component="span" sx={{ color: 'var(--error)' }}>*</Box>
+        </Typography>
+        <TextField
           id="title"
+          fullWidth
+          size="small"
           value={formData.title}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, title: e.target.value }))
-          }
+          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           placeholder="输入切片标题"
           required
+          sx={textFieldSx}
         />
-      </div>
+      </Box>
 
       {/* 描述 */}
-      <div className="space-y-2">
-        <Label htmlFor="description">描述</Label>
-        <Textarea
+      <Box>
+        <Typography
+          component="label"
+          htmlFor="description"
+          variant="body2"
+          sx={{ display: 'block', mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}
+        >
+          描述
+        </Typography>
+        <TextField
           id="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, description: e.target.value }))
-          }
-          placeholder="输入切片描述信息..."
+          fullWidth
+          size="small"
+          multiline
           rows={3}
+          value={formData.description}
+          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+          placeholder="输入切片描述信息..."
+          sx={textFieldSx}
         />
-      </div>
+      </Box>
 
       {/* 分类和放大倍数 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>
-            分类 <span className="text-error">*</span>
-          </Label>
-          <Select
-            value={formData.category}
-            onValueChange={(value: CourseCategory) =>
-              setFormData((prev) => ({ ...prev, category: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="选择分类" />
-            </SelectTrigger>
-            <SelectContent>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+        <Box>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}>
+            分类 <Box component="span" sx={{ color: 'var(--error)' }}>*</Box>
+          </Typography>
+          <FormControl fullWidth size="small">
+            <Select
+              value={formData.category}
+              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value as CourseCategory }))}
+              sx={{
+                bgcolor: 'var(--background)',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border)' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border)' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--primary)' },
+                '& .MuiSelect-select': { color: 'var(--foreground)' },
+              }}
+            >
               {categoryOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <MenuItem key={option.value} value={option.value}>
                   {option.label}
-                </SelectItem>
+                </MenuItem>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
+            </Select>
+          </FormControl>
+        </Box>
 
-        <div className="space-y-2">
-          <Label>放大倍数</Label>
-          <Select
-            value={formData.magnification.toString()}
-            onValueChange={(value) =>
-              setFormData((prev) => ({
-                ...prev,
-                magnification: parseInt(value),
-              }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
+        <Box>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}>
+            放大倍数
+          </Typography>
+          <FormControl fullWidth size="small">
+            <Select
+              value={formData.magnification.toString()}
+              onChange={(e) => setFormData((prev) => ({ ...prev, magnification: parseInt(e.target.value) }))}
+              sx={{
+                bgcolor: 'var(--background)',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border)' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border)' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--primary)' },
+                '& .MuiSelect-select': { color: 'var(--foreground)' },
+              }}
+            >
               {magnificationOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value.toString()}>
+                <MenuItem key={option.value} value={option.value.toString()}>
                   {option.label}
-                </SelectItem>
+                </MenuItem>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
 
       {/* 标签 */}
-      <div className="space-y-2">
-        <Label>标签</Label>
-        <div className="flex flex-wrap gap-2 mb-2">
+      <Box>
+        <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}>
+          标签
+        </Typography>
+        <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap sx={{ mb: 1 }}>
           {formData.tags.map((tag) => (
-            <Badge
+            <Chip
               key={tag}
-              variant="secondary"
-              className="gap-1 pr-1"
-            >
-              {tag}
-              <button
-                type="button"
-                onClick={() => removeTag(tag)}
-                className="ml-1 hover:text-error"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </Badge>
+              label={tag}
+              onDelete={() => removeTag(tag)}
+              deleteIcon={<X className="w-3 h-3" />}
+              sx={{
+                bgcolor: 'var(--muted)',
+                '& .MuiChip-label': { color: 'var(--foreground)' },
+                '& .MuiChip-deleteIcon': { color: 'var(--muted-foreground)', '&:hover': { color: 'var(--error)' } },
+              }}
+            />
           ))}
-        </div>
-        <div className="flex gap-2">
-          <Input
+        </Stack>
+        <Stack direction="row" spacing={1}>
+          <TextField
+            size="small"
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={handleTagKeyDown}
             placeholder="输入标签后按回车添加"
-            className="flex-1"
+            sx={{ flex: 1, ...textFieldSx }}
           />
           <Button
             type="button"
-            variant="outline"
-            size="icon"
+            variant="outlined"
+            size="small"
             onClick={addTag}
             disabled={!newTag.trim()}
+            sx={{
+              minWidth: 40,
+              borderColor: 'var(--border)',
+              color: 'var(--foreground)',
+              '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+              '&.Mui-disabled': { borderColor: 'var(--border)', color: 'var(--muted-foreground)' },
+            }}
           >
             <Plus className="w-4 h-4" />
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
       {/* 元数据（只读） */}
       {item.metadata && (
-        <div className="space-y-2">
-          <Label className="text-muted-foreground">切片尺寸（自动检测）</Label>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 rounded-lg bg-muted/50">
-              <span className="text-xs text-muted-foreground">宽度</span>
-              <p className="font-medium">{item.metadata.width.toLocaleString()} px</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50">
-              <span className="text-xs text-muted-foreground">高度</span>
-              <p className="font-medium">{item.metadata.height.toLocaleString()} px</p>
-            </div>
-          </div>
-        </div>
+        <Box>
+          <Typography variant="body2" sx={{ mb: 0.5, color: 'var(--muted-foreground)' }}>
+            切片尺寸（自动检测）
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+            <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'color-mix(in srgb, var(--muted) 50%, transparent)' }}>
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                宽度
+              </Typography>
+              <Typography sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                {item.metadata.width.toLocaleString()} px
+              </Typography>
+            </Box>
+            <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'color-mix(in srgb, var(--muted) 50%, transparent)' }}>
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                高度
+              </Typography>
+              <Typography sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+                {item.metadata.height.toLocaleString()} px
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       )}
 
-      <Separator />
+      <Divider sx={{ borderColor: 'var(--border)' }} />
 
       {/* 权限设置 */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>公开可见</Label>
-            <p className="text-sm text-muted-foreground">
+      <Stack spacing={2}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+              公开可见
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
               所有用户可以浏览此切片
-            </p>
-          </div>
+            </Typography>
+          </Box>
           <Switch
             checked={formData.isPublic}
-            onCheckedChange={(checked) =>
-              setFormData((prev) => ({ ...prev, isPublic: checked }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))}
+            sx={{
+              '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--primary)' },
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: 'var(--primary)' },
+            }}
           />
-        </div>
+        </Stack>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>允许下载</Label>
-            <p className="text-sm text-muted-foreground">
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+              允许下载
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
               允许用户下载原始 SVS 文件
-            </p>
-          </div>
+            </Typography>
+          </Box>
           <Switch
             checked={formData.allowDownload}
-            onCheckedChange={(checked) =>
-              setFormData((prev) => ({ ...prev, allowDownload: checked }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, allowDownload: e.target.checked }))}
+            sx={{
+              '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--primary)' },
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: 'var(--primary)' },
+            }}
           />
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       {/* 操作按钮 */}
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ pt: 2 }}>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={onCancel}
+          sx={{
+            borderColor: 'var(--border)',
+            color: 'var(--foreground)',
+            '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+          }}
+        >
           取消
         </Button>
-        <Button type="submit">保存</Button>
-      </div>
-    </form>
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{
+            bgcolor: 'var(--primary)',
+            '&:hover': { bgcolor: 'var(--primary)', opacity: 0.9 },
+          }}
+        >
+          保存
+        </Button>
+      </Stack>
+    </Box>
   )
 }

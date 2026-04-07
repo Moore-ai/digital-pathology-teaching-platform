@@ -1,10 +1,15 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import {
+  Box,
+  Typography,
+  Stack,
+  Chip,
+  Button,
+  LinearProgress,
+} from '@mui/material'
 import { SliceUploadItem as SliceUploadItemType, SliceUploadStatus } from '@/types/slice'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Microscope,
   Pause,
@@ -41,38 +46,38 @@ const statusConfig: Record<SliceUploadStatus, {
   pending: {
     label: '待上传',
     icon: <Clock className="w-4 h-4" />,
-    color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
+    color: 'var(--muted-foreground)',
+    bgColor: 'var(--muted)',
   },
   uploading: {
     label: '上传中',
     icon: <Loader2 className="w-4 h-4 animate-spin" />,
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
+    color: 'var(--primary)',
+    bgColor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
   },
   paused: {
     label: '已暂停',
     icon: <Pause className="w-4 h-4" />,
-    color: 'text-warning',
-    bgColor: 'bg-warning/10',
+    color: 'var(--warning)',
+    bgColor: 'color-mix(in srgb, var(--warning) 10%, transparent)',
   },
   processing: {
     label: '处理中',
     icon: <Settings className="w-4 h-4 animate-spin" />,
-    color: 'text-info',
-    bgColor: 'bg-info/10',
+    color: 'var(--info)',
+    bgColor: 'color-mix(in srgb, var(--info) 10%, transparent)',
   },
   success: {
     label: '完成',
     icon: <CheckCircle className="w-4 h-4" />,
-    color: 'text-success',
-    bgColor: 'bg-success/10',
+    color: 'var(--success)',
+    bgColor: 'color-mix(in srgb, var(--success) 10%, transparent)',
   },
   error: {
     label: '失败',
     icon: <AlertCircle className="w-4 h-4" />,
-    color: 'text-error',
-    bgColor: 'bg-error/10',
+    color: 'var(--error)',
+    bgColor: 'color-mix(in srgb, var(--error) 10%, transparent)',
   },
 }
 
@@ -95,7 +100,6 @@ export function SliceUploadItem({
   onEdit,
   onPause,
   onResume,
-  onCancel,
   onRetry,
   onRemove,
   onPreview,
@@ -108,12 +112,12 @@ export function SliceUploadItem({
       case 'pending':
         return (
           <>
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+              <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
               编辑
             </Button>
-            <Button variant="ghost" size="sm" onClick={onRemove}>
-              <X className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onRemove}>
+              <X className="w-4 h-4" style={{ marginRight: 4 }} />
               移除
             </Button>
           </>
@@ -122,12 +126,12 @@ export function SliceUploadItem({
       case 'uploading':
         return (
           <>
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+              <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
               编辑
             </Button>
-            <Button variant="ghost" size="sm" onClick={onPause}>
-              <Pause className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onPause}>
+              <Pause className="w-4 h-4" style={{ marginRight: 4 }} />
               暂停
             </Button>
           </>
@@ -136,16 +140,16 @@ export function SliceUploadItem({
       case 'paused':
         return (
           <>
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+              <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
               编辑
             </Button>
-            <Button variant="ghost" size="sm" onClick={onResume}>
-              <Play className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onResume}>
+              <Play className="w-4 h-4" style={{ marginRight: 4 }} />
               继续
             </Button>
-            <Button variant="ghost" size="sm" onClick={onRemove}>
-              <X className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onRemove}>
+              <X className="w-4 h-4" style={{ marginRight: 4 }} />
               移除
             </Button>
           </>
@@ -153,29 +157,27 @@ export function SliceUploadItem({
 
       case 'processing':
         return (
-          <>
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
-              编辑
-            </Button>
-          </>
+          <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+            <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
+            编辑
+          </Button>
         )
 
       case 'success':
         return (
           <>
             {onPreview && (
-              <Button variant="ghost" size="sm" onClick={onPreview}>
-                <Eye className="w-4 h-4 mr-1" />
+              <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onPreview}>
+                <Eye className="w-4 h-4" style={{ marginRight: 4 }} />
                 预览
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+              <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
               编辑
             </Button>
-            <Button variant="ghost" size="sm" onClick={onRemove}>
-              <X className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onRemove}>
+              <X className="w-4 h-4" style={{ marginRight: 4 }} />
               移除
             </Button>
           </>
@@ -184,16 +186,16 @@ export function SliceUploadItem({
       case 'error':
         return (
           <>
-            <Button variant="ghost" size="sm" onClick={onRetry}>
-              <RotateCcw className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onRetry}>
+              <RotateCcw className="w-4 h-4" style={{ marginRight: 4 }} />
               重试
             </Button>
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit3 className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onEdit}>
+              <Edit3 className="w-4 h-4" style={{ marginRight: 4 }} />
               编辑
             </Button>
-            <Button variant="ghost" size="sm" onClick={onRemove}>
-              <X className="w-4 h-4 mr-1" />
+            <Button size="small" sx={{ color: 'var(--muted-foreground)', '&:hover': { bgcolor: 'var(--muted)' } }} onClick={onRemove}>
+              <X className="w-4 h-4" style={{ marginRight: 4 }} />
               移除
             </Button>
           </>
@@ -204,109 +206,179 @@ export function SliceUploadItem({
     }
   }
 
+  // 获取边框颜色
+  const getBorderColor = () => {
+    if (item.status === 'success') return 'color-mix(in srgb, var(--success) 30%, transparent)'
+    if (item.status === 'error') return 'color-mix(in srgb, var(--error) 30%, transparent)'
+    return 'var(--border)'
+  }
+
   return (
-    <div className={cn(
-      'flex items-start gap-4 p-4 rounded-lg border',
-      'bg-background transition-all duration-200',
-      item.status === 'success' && 'border-success/30',
-      item.status === 'error' && 'border-error/30',
-    )}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 2,
+        p: 2,
+        borderRadius: 1,
+        border: '1px solid',
+        borderColor: getBorderColor(),
+        bgcolor: 'var(--card)',
+        transition: 'all 0.2s',
+      }}
+    >
       {/* 缩略图/图标 */}
-      <div className={cn(
-        'w-20 h-20 rounded-lg flex items-center justify-center shrink-0',
-        status.bgColor
-      )}>
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          bgcolor: status.bgColor,
+        }}
+      >
         {item.thumbnailUrl ? (
-          <img
+          <Box
+            component="img"
             src={item.thumbnailUrl}
             alt={item.title}
-            className="w-full h-full object-cover rounded-lg"
+            sx={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 1 }}
           />
         ) : (
-          <Microscope className={cn('w-8 h-8', status.color)} />
+          <Microscope className="w-8 h-8" style={{ color: status.color }} />
         )}
-      </div>
+      </Box>
 
       {/* 信息区 */}
-      <div className="flex-1 min-w-0">
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         {/* 标题行 */}
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-medium text-foreground truncate flex-1">
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 500,
+              color: 'var(--foreground)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+            }}
+          >
             {item.title}
-          </h4>
-          <Badge variant="outline" className={cn('text-xs', status.color)}>
-            {status.icon}
-            <span className="ml-1">{status.label}</span>
-          </Badge>
-        </div>
+          </Typography>
+          <Chip
+            size="small"
+            label={
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                {status.icon}
+                <span>{status.label}</span>
+              </Stack>
+            }
+            sx={{
+              height: 24,
+              fontSize: '0.75rem',
+              bgcolor: status.bgColor,
+              '& .MuiChip-label': { color: status.color, display: 'flex', alignItems: 'center', gap: 0.5 },
+            }}
+          />
+        </Stack>
 
         {/* 文件名 */}
-        <p className="text-sm text-muted-foreground truncate mb-2">
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'var(--muted-foreground)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            mb: 1,
+          }}
+        >
           {item.file.name}
-        </p>
+        </Typography>
 
         {/* 进度条 */}
         {(item.status === 'uploading' || item.status === 'paused') && (
-          <div className="mb-2">
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  'h-full transition-all duration-300',
-                  item.status === 'paused' ? 'bg-warning' : 'bg-primary'
-                )}
-                style={{ width: `${progress.percent}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
-              <span>{progress.percent}%</span>
-              <span>
+          <Box sx={{ mb: 1 }}>
+            <LinearProgress
+              variant="determinate"
+              value={progress.percent}
+              sx={{
+                height: 8,
+                borderRadius: 1,
+                bgcolor: 'var(--muted)',
+                '& .MuiLinearProgress-bar': {
+                  bgcolor: item.status === 'paused' ? 'var(--warning)' : 'var(--primary)',
+                  borderRadius: 1,
+                },
+              }}
+            />
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 0.5 }}>
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                {progress.percent}%
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
                 {formatBytes(progress.uploadedBytes)} / {formatBytes(progress.totalBytes)}
-              </span>
-            </div>
-          </div>
+              </Typography>
+            </Stack>
+          </Box>
         )}
 
         {/* 处理中状态 */}
         {item.status === 'processing' && (
-          <div className="flex items-center gap-2 text-sm text-info">
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ color: 'var(--info)' }}>
             <Settings className="w-4 h-4 animate-spin" />
-            <span>正在处理切片数据...</span>
-          </div>
+            <Typography variant="body2" sx={{ color: 'var(--info)' }}>
+              正在处理切片数据...
+            </Typography>
+          </Stack>
         )}
 
         {/* 上传速度和剩余时间 */}
         {item.status === 'uploading' && progress.speed && progress.remainingTime && (
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Zap className="w-3 h-3" />
-              <span>{progress.speed.toFixed(1)} MB/s</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <span>剩余 {formatTime(progress.remainingTime)}</span>
-            </div>
-          </div>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Zap className="w-3 h-3" style={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                {progress.speed.toFixed(1)} MB/s
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Clock className="w-3 h-3" style={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+                剩余 {formatTime(progress.remainingTime)}
+              </Typography>
+            </Stack>
+          </Stack>
         )}
 
         {/* 元数据 */}
         {item.metadata && item.status === 'success' && (
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-            <span>{item.metadata.magnification}x</span>
-            <span>·</span>
-            <span>{(item.metadata.width / 1000).toFixed(0)}K × {(item.metadata.height / 1000).toFixed(0)}K</span>
-          </div>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+              {item.metadata.magnification}x
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>·</Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+              {(item.metadata.width / 1000).toFixed(0)}K × {(item.metadata.height / 1000).toFixed(0)}K
+            </Typography>
+          </Stack>
         )}
 
         {/* 错误信息 */}
         {item.status === 'error' && item.error && (
-          <p className="text-sm text-error mt-1">{item.error}</p>
+          <Typography variant="body2" sx={{ color: 'var(--error)', mt: 0.5 }}>
+            {item.error}
+          </Typography>
         )}
-      </div>
+      </Box>
 
       {/* 操作按钮 */}
-      <div className="flex items-center gap-1 shrink-0">
+      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexShrink: 0 }}>
         {renderActions()}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 }

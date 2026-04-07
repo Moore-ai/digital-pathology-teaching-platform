@@ -2,101 +2,123 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { Box, Typography, Stack, List, ListItem, Paper } from '@mui/material'
 import { LoginForm } from '@/components/features/auth/LoginForm'
 import { Microscope } from 'lucide-react'
 
 export default function LoginPage(): ReactNode {
   return (
-    <div className="min-h-screen flex">
+    <Box sx={{ minHeight: '100vh', display: 'flex' }}>
       {/* 左侧装饰区域 */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
+      <Box
+        sx={{
+          display: { xs: 'none', lg: 'flex' },
+          width: '50%',
+          bgcolor: 'var(--primary)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
         {/* 背景装饰 */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-white/20" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-white/10" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full border border-white/20" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-100 h-100 rounded-full border border-white/20" />
-        </div>
+        <Box sx={{ position: 'absolute', inset: 0, opacity: 0.1 }}>
+          <Box sx={{ position: 'absolute', top: 80, left: 80, width: 256, height: 256, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.2)' }} />
+          <Box sx={{ position: 'absolute', bottom: 80, right: 80, width: 384, height: 384, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.1)' }} />
+          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 600, height: 600, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)' }} />
+          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, height: 400, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)' }} />
+        </Box>
 
         {/* 内容 */}
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', px: 6, color: 'white' }}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
+            <Box sx={{ width: 48, height: 48, bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Microscope className="w-7 h-7" />
-            </div>
-            <span className="font-heading text-2xl font-semibold">数字病理教学平台</span>
-          </div>
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              数字病理教学平台
+            </Typography>
+          </Stack>
 
-          <h1 className="text-4xl font-heading font-bold mb-4">
+          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
             临床视界 · 精准教学
-          </h1>
-          <p className="text-lg text-white/80 max-w-md">
+          </Typography>
+          <Typography sx={{ fontSize: '1.125rem', color: 'rgba(255,255,255,0.8)', maxWidth: 400 }}>
             专业的医学病理学数字化教学平台，提供切片浏览、课程学习、在线考试等功能
-          </p>
+          </Typography>
 
           {/* 特性列表 */}
-          <ul className="mt-8 space-y-3 text-white/90">
-            <li className="flex items-center gap-3">
-              <span className="w-2 h-2 bg-accent rounded-full" />
-              高清 SVS 切片在线浏览
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="w-2 h-2 bg-accent rounded-full" />
-              MOOC 模式课程学习
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="w-2 h-2 bg-accent rounded-full" />
-              智能组卷与在线考试
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="w-2 h-2 bg-accent rounded-full" />
-              学习进度可视化分析
-            </li>
-          </ul>
-        </div>
-      </div>
+          <List sx={{ mt: 4 }}>
+            {[
+              '高清 SVS 切片在线浏览',
+              'MOOC 模式课程学习',
+              '智能组卷与在线考试',
+              '学习进度可视化分析',
+            ].map((item, index) => (
+              <ListItem key={index} sx={{ px: 0, py: 0.5, color: 'rgba(255,255,255,0.9)' }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'var(--accent)', mr: 1.5 }} />
+                {item}
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Box>
 
       {/* 右侧登录区域 */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4, bgcolor: 'var(--background)' }}>
+        <Box sx={{ width: '100%', maxWidth: 400 }}>
           {/* 移动端 Logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Microscope className="w-6 h-6 text-white" />
-            </div>
-            <span className="font-heading text-xl font-semibold text-primary">
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="center"
+            spacing={1}
+            sx={{ display: { xs: 'flex', lg: 'none' }, mb: 4 }}
+          >
+            <Box sx={{ width: 40, height: 40, bgcolor: 'var(--primary)', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Microscope className="w-6 h-6" style={{ color: 'white' }} />
+            </Box>
+            <Typography sx={{ fontWeight: 600, color: 'var(--primary)' }}>
               数字病理教学平台
-            </span>
-          </div>
+            </Typography>
+          </Stack>
 
           {/* 登录卡片 */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 ring-1 ring-border">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-heading font-semibold text-foreground">
+          <Paper
+            sx={{
+              borderRadius: 3,
+              boxShadow: 3,
+              p: 4,
+              border: '1px solid var(--border)',
+              bgcolor: 'var(--card)',
+            }}
+          >
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Typography variant="h5" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
                 欢迎回来
-              </h2>
-              <p className="text-muted-foreground mt-1">
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
                 请登录您的账户
-              </p>
-            </div>
+              </Typography>
+            </Box>
 
             <LoginForm />
 
             {/* 底部链接 */}
-            <div className="mt-6 text-center text-sm text-muted-foreground">
+            <Typography variant="body2" sx={{ mt: 3, textAlign: 'center', color: 'var(--muted-foreground)' }}>
               首次使用？{' '}
-              <Link href="#" className="text-secondary hover:underline">
-                联系管理员
+              <Link href="#" style={{ color: 'var(--secondary)', textDecoration: 'none' }}>
+                <Box component="span" sx={{ '&:hover': { textDecoration: 'underline' } }}>
+                  联系管理员
+                </Box>
               </Link>
-            </div>
-          </div>
+            </Typography>
+          </Paper>
 
           {/* 版权信息 */}
-          <p className="mt-8 text-center text-xs text-muted-foreground">
+          <Typography variant="caption" sx={{ display: 'block', mt: 4, textAlign: 'center', color: 'var(--muted-foreground)' }}>
             © 2026 数字病理教学平台 · 仅供教学使用
-          </p>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   )
 }

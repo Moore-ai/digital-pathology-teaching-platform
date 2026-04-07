@@ -7,9 +7,19 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuthStore } from '@/stores/authStore'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import {
+  Box,
+  Stack,
+  Typography,
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Link as MuiLink,
+  Alert,
+  InputAdornment,
+  IconButton,
+} from '@mui/material'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 const loginSchema = z.object({
@@ -57,92 +67,153 @@ export function LoginForm({ className }: LoginFormProps): ReactNode {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={cn("space-y-4", className)}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      className={className}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+    >
       {/* 邮箱输入 */}
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium text-foreground">
+      <Box>
+        <Typography
+          component="label"
+          htmlFor="email"
+          variant="body2"
+          sx={{ display: 'block', mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}
+        >
           邮箱 / 学工号
-        </label>
-        <Input
+        </Typography>
+        <TextField
           id="email"
           type="email"
           placeholder="请输入邮箱"
+          fullWidth
+          size="small"
+          error={!!errors.email}
+          helperText={errors.email?.message}
           {...register('email')}
-          className={errors.email ? 'border-error' : ''}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'var(--background)',
+              '& fieldset': { borderColor: errors.email ? 'var(--error)' : 'var(--border)' },
+              '&:hover fieldset': { borderColor: errors.email ? 'var(--error)' : 'var(--border)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& .MuiInputBase-input': { color: 'var(--foreground)' },
+            '& .MuiInputBase-input::placeholder': { color: 'var(--muted-foreground)', opacity: 1 },
+            '& .MuiFormHelperText-root': { color: 'var(--error)', mx: 0 },
+          }}
         />
-        {errors.email && (
-          <p className="text-xs text-error">{errors.email.message}</p>
-        )}
-      </div>
+      </Box>
 
       {/* 密码输入 */}
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium text-foreground">
+      <Box>
+        <Typography
+          component="label"
+          htmlFor="password"
+          variant="body2"
+          sx={{ display: 'block', mb: 0.5, fontWeight: 500, color: 'var(--foreground)' }}
+        >
           密码
-        </label>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="请输入密码"
-            {...register('password')}
-            className={cn("pr-10", errors.password ? 'border-error' : '')}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showPassword ? (
-              <EyeOff className="w-4 h-4" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-          </button>
-        </div>
-        {errors.password && (
-          <p className="text-xs text-error">{errors.password.message}</p>
-        )}
-      </div>
+        </Typography>
+        <TextField
+          id="password"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="请输入密码"
+          fullWidth
+          size="small"
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          {...register('password')}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                  size="small"
+                  sx={{ color: 'var(--muted-foreground)' }}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'var(--background)',
+              '& fieldset': { borderColor: errors.password ? 'var(--error)' : 'var(--border)' },
+              '&:hover fieldset': { borderColor: errors.password ? 'var(--error)' : 'var(--border)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
+            },
+            '& .MuiInputBase-input': { color: 'var(--foreground)' },
+            '& .MuiInputBase-input::placeholder': { color: 'var(--muted-foreground)', opacity: 1 },
+            '& .MuiFormHelperText-root': { color: 'var(--error)', mx: 0 },
+          }}
+        />
+      </Box>
 
       {/* 记住登录 & 忘记密码 */}
-      <div className="flex items-center justify-between text-sm">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" className="w-4 h-4 rounded border-input" />
-          <span className="text-muted-foreground">保持登录</span>
-        </label>
-        <a href="#" className="text-secondary hover:underline">
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              sx={{
+                color: 'var(--border)',
+                '&.Mui-checked': { color: 'var(--primary)' },
+              }}
+            />
+          }
+          label={
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              保持登录
+            </Typography>
+          }
+        />
+        <MuiLink
+          href="#"
+          variant="body2"
+          sx={{ color: 'var(--secondary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+        >
           忘记密码？
-        </a>
-      </div>
+        </MuiLink>
+      </Stack>
 
       {/* 错误提示 */}
       {error && (
-        <div className="p-3 rounded-lg bg-error/10 text-error text-sm">
+        <Alert severity="error" sx={{ bgcolor: 'color-mix(in srgb, var(--error) 10%, transparent)', color: 'var(--error)' }}>
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* 登录按钮 */}
       <Button
         type="submit"
-        className="w-full h-10"
+        variant="contained"
+        fullWidth
         disabled={isLoading}
+        sx={{
+          height: 40,
+          bgcolor: 'var(--primary)',
+          '&:hover': { bgcolor: 'var(--primary)' },
+          '&.Mui-disabled': { bgcolor: 'var(--muted)', color: 'var(--muted-foreground)' },
+        }}
       >
         {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            登录中...
-          </>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>登录中...</span>
+          </Stack>
         ) : (
           '登 录'
         )}
       </Button>
 
       {/* 提示信息 */}
-      <p className="text-xs text-muted-foreground text-center">
+      <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--muted-foreground)' }}>
         原型演示：直接点击登录即可进入系统
-      </p>
-    </form>
+      </Typography>
+    </Box>
   )
 }

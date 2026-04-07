@@ -2,9 +2,8 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Paper, Box, Typography, Stack } from '@mui/material'
 import type { TrendDataPoint } from '@/lib/mock/results'
-import { formatDate } from '@/lib/utils'
 
 interface ScoreTrendChartProps {
   data: TrendDataPoint[]
@@ -56,17 +55,20 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-medium">成绩趋势</CardTitle>
-        <CardDescription>最近考试成绩变化趋势</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="w-full overflow-x-auto">
+    <Paper sx={{ bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid var(--border)' }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
+          成绩趋势
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mt: 0.5 }}>
+          最近考试成绩变化趋势
+        </Typography>
+      </Box>
+      <Box sx={{ p: 2 }}>
+        <Box sx={{ width: '100%', overflowX: 'auto' }}>
           <svg
             viewBox={`0 0 ${width} ${height}`}
-            className="w-full min-w-[400px]"
-            style={{ height: 'auto', maxHeight: '250px' }}
+            style={{ width: '100%', minWidth: '400px', height: 'auto', maxHeight: '250px' }}
           >
             {/* Y轴刻度线 */}
             {yTickValues.map((value, i) => {
@@ -78,17 +80,16 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
                     y1={y}
                     x2={width - marginRight}
                     y2={y}
-                    stroke="currentColor"
+                    stroke="var(--muted-foreground)"
                     strokeOpacity={value === 60 ? 0.3 : 0.1}
                     strokeDasharray={value === 60 ? '4 4' : 'none'}
-                    className="text-muted-foreground"
                   />
                   <text
                     x={marginLeft - 8}
                     y={y}
                     textAnchor="end"
                     alignmentBaseline="middle"
-                    className="text-xs fill-muted-foreground"
+                    style={{ fontSize: '0.75rem', fill: 'var(--muted-foreground)' }}
                   >
                     {value}
                   </text>
@@ -105,7 +106,13 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
                     x={x}
                     y={height - 10}
                     textAnchor="middle"
-                    className="text-xs fill-muted-foreground hover:fill-secondary cursor-pointer transition-colors"
+                    style={{
+                      fontSize: '0.75rem',
+                      fill: 'var(--muted-foreground)',
+                      cursor: 'pointer',
+                      transition: 'fill 0.2s',
+                    }}
+                    className="[&:hover]:fill-secondary"
                   >
                     {d.examName}
                   </text>
@@ -117,21 +124,20 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
             <path
               d={avgPath}
               fill="none"
-              stroke="currentColor"
+              stroke="var(--muted-foreground)"
+              strokeOpacity={0.5}
               strokeWidth="2"
               strokeDasharray="6 4"
-              className="text-muted-foreground/50"
             />
 
             {/* 成绩线 */}
             <path
               d={scorePath}
               fill="none"
-              stroke="currentColor"
+              stroke="var(--secondary)"
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-secondary"
             />
 
             {/* 数据点 */}
@@ -140,38 +146,37 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
               const y = getY(d.score)
               return (
                 <Link key={d.examId} href={`/exams/${d.examId}/result`}>
-                  <g className="cursor-pointer group">
+                  <g style={{ cursor: 'pointer' }}>
                     <circle
                       cx={x}
                       cy={y}
                       r="6"
-                      fill="currentColor"
-                      className="text-secondary/20 group-hover:text-secondary/30 transition-colors"
+                      fill="var(--secondary)"
+                      fillOpacity={0.2}
+                      style={{ transition: 'fill-opacity 0.2s' }}
                     />
                     <circle
                       cx={x}
                       cy={y}
                       r="4"
-                      fill="currentColor"
-                      className="text-secondary group-hover:text-secondary/80 transition-colors"
+                      fill="var(--secondary)"
                     />
                     {/* Tooltip */}
-                    <g className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <g style={{ opacity: 0, transition: 'opacity 0.2s' }} className="[&:hover]:opacity-100">
                       <rect
                         x={x - 50}
                         y={y - 45}
                         width="100"
                         height="35"
                         rx="4"
-                        fill="hsl(var(--card))"
-                        stroke="hsl(var(--border))"
-                        className="shadow-md"
+                        fill="var(--card)"
+                        stroke="var(--border)"
                       />
                       <text
                         x={x}
                         y={y - 32}
                         textAnchor="middle"
-                        className="text-xs fill-foreground font-medium"
+                        style={{ fontSize: '0.75rem', fill: 'var(--foreground)', fontWeight: 500 }}
                       >
                         {d.score} 分
                       </text>
@@ -179,7 +184,7 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
                         x={x}
                         y={y - 18}
                         textAnchor="middle"
-                        className="text-xs fill-muted-foreground"
+                        style={{ fontSize: '0.75rem', fill: 'var(--muted-foreground)' }}
                       >
                         平均: {d.avgScore} 分
                       </text>
@@ -189,20 +194,32 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps): ReactNode {
               )
             })}
           </svg>
-        </div>
+        </Box>
 
         {/* 图例 */}
-        <div className="flex items-center justify-center gap-6 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 rounded bg-secondary" />
-            <span className="text-muted-foreground">我的成绩</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-0.5 bg-muted-foreground/50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, currentColor 0, currentColor 4px, transparent 4px, transparent 8px)' }} />
-            <span className="text-muted-foreground">班级平均</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={3} sx={{ mt: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 16, height: 4, borderRadius: 1, bgcolor: 'var(--secondary)' }} />
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              我的成绩
+            </Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box
+              sx={{
+                width: 16,
+                height: 2,
+                bgcolor: 'transparent',
+                borderTop: '2px dashed var(--muted-foreground)',
+                opacity: 0.5,
+              }}
+            />
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              班级平均
+            </Typography>
+          </Stack>
+        </Stack>
+      </Box>
+    </Paper>
   )
 }

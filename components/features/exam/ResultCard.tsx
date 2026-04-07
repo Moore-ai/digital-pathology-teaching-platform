@@ -2,108 +2,214 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { Paper, Box, Typography, Stack, Chip, Divider } from '@mui/material'
 import type { ExamResult, ScoreLevel } from '@/lib/mock/results'
 import { scoreLevelConfig } from '@/lib/mock/results'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Clock, Users, Eye } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 interface ResultCardProps {
   className?: string
   result: ExamResult
-  showRank?: boolean  // 是否显示排名，默认 true
+  showRank?: boolean
 }
 
-// 获取状态条颜色类
-function getStatusBarClass(level: ScoreLevel): string {
+// 获取状态条颜色
+function getStatusBarColor(level: ScoreLevel): string {
   const config = scoreLevelConfig[level]
-  return config.bgClass
+  // 将 Tailwind 类转换为 CSS 变量
+  switch (level) {
+    case 'excellent':
+      return 'var(--success)'
+    case 'good':
+      return 'var(--secondary)'
+    case 'pass':
+      return 'var(--warning)'
+    case 'fail':
+      return 'var(--error)'
+    default:
+      return 'var(--muted-foreground)'
+  }
 }
 
 export function ResultCard({ className, result, showRank = true }: ResultCardProps): ReactNode {
   const levelConfig = scoreLevelConfig[result.level]
-  const statusBarClass = getStatusBarClass(result.level)
+  const statusBarColor = getStatusBarColor(result.level)
+
+  // 获取等级标签颜色
+  const getLevelColor = (level: ScoreLevel): { bg: string; text: string } => {
+    switch (level) {
+      case 'excellent':
+        return { bg: 'color-mix(in srgb, var(--success) 10%, transparent)', text: 'var(--success)' }
+      case 'good':
+        return { bg: 'color-mix(in srgb, var(--secondary) 10%, transparent)', text: 'var(--secondary)' }
+      case 'pass':
+        return { bg: 'color-mix(in srgb, var(--warning) 10%, transparent)', text: 'var(--warning)' }
+      case 'fail':
+        return { bg: 'color-mix(in srgb, var(--error) 10%, transparent)', text: 'var(--error)' }
+      default:
+        return { bg: 'var(--muted)', text: 'var(--muted-foreground)' }
+    }
+  }
+
+  const levelColors = getLevelColor(result.level)
 
   return (
-    <Card className={cn(
-      "group hover:shadow-md transition-all cursor-pointer relative overflow-hidden h-full flex flex-col",
-      className
-    )}>
+    <Paper
+      className={className}
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s',
+        bgcolor: 'var(--card)',
+        border: '1px solid var(--border)',
+        '&:hover': {
+          boxShadow: 3,
+        },
+      }}
+    >
       {/* 成绩状态条 */}
-      <div className={cn(
-        "absolute left-0 top-0 bottom-0 w-1.5",
-        statusBarClass
-      )} />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 6,
+          bgcolor: statusBarColor,
+        }}
+      />
 
-      <CardContent className="pt-4 pb-4 pl-5 flex-1 flex flex-col">
+      <Box sx={{ p: 2, pl: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* 标题行 */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <Link href={`/exams/${result.examId}/result`} className="flex-1 min-w-0">
-            <h3 className="font-medium text-foreground line-clamp-1 group-hover:text-secondary transition-colors">
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1} sx={{ mb: 1 }}>
+          <Link href={`/exams/${result.examId}/result`} style={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 500,
+                color: 'var(--foreground)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                '&:hover': { color: 'var(--secondary)' },
+                transition: 'color 0.2s',
+              }}
+            >
               {result.examTitle}
-            </h3>
+            </Typography>
           </Link>
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge className={cn(levelConfig.textClass, "border-current")}>
-              {levelConfig.label}
-            </Badge>
-            <span className="text-2xl font-bold">{result.score}</span>
-          </div>
-        </div>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Chip
+              size="small"
+              label={levelConfig.label}
+              sx={{
+                height: 24,
+                bgcolor: levelColors.bg,
+                color: levelColors.text,
+                '& .MuiChip-label': { color: levelColors.text },
+              }}
+            />
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>
+              {result.score}
+            </Typography>
+          </Stack>
+        </Stack>
 
         {/* 考试信息 */}
-        <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'var(--muted-foreground)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            mb: 1.5,
+          }}
+        >
           {result.examDescription || result.category}
-        </p>
+        </Typography>
 
         {/* 统计信息 */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-auto">
-          <span>{result.category}</span>
-          <span>·</span>
-          <span>{formatDate(result.submittedAt)}</span>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          sx={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', mt: 'auto' }}
+        >
+          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+            {result.category}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>·</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+            {formatDate(result.submittedAt)}
+          </Typography>
           {showRank && (
             <>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <Users className="w-3.5 h-3.5" />
-                排名 {result.rank}/{result.totalStudents}
-              </span>
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>·</Typography>
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Users className="w-3.5 h-3.5" style={{ color: 'var(--muted-foreground)' }} />
+                <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                  排名 {result.rank}/{result.totalStudents}
+                </Typography>
+              </Stack>
             </>
           )}
-        </div>
+        </Stack>
 
         {/* 详细数据 */}
-        <div className="grid grid-cols-3 gap-3 mt-3 pt-3 border-t">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-success">{result.correctCount}</div>
-            <div className="text-xs text-muted-foreground">正确</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-semibold text-error">{result.wrongCount}</div>
-            <div className="text-xs text-muted-foreground">错误</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-semibold flex items-center justify-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              {result.timeSpent}
-            </div>
-            <div className="text-xs text-muted-foreground">分钟</div>
-          </div>
-        </div>
+        <Divider sx={{ my: 1.5 }} />
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.5 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--success)' }}>
+              {result.correctCount}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+              正确
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--error)' }}>
+              {result.wrongCount}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+              错误
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
+              <Clock className="w-3.5 h-3.5" style={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--foreground)' }}>
+                {result.timeSpent}
+              </Typography>
+            </Stack>
+            <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
+              分钟
+            </Typography>
+          </Box>
+        </Box>
 
         {/* 操作按钮 */}
-        <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Link href={`/exams/${result.examId}/result`} className="flex-1">
+        <Box
+          sx={{
+            mt: 1.5,
+            opacity: 0,
+            transition: 'opacity 0.2s',
+            '.MuiPaper-root:hover &': { opacity: 1 },
+          }}
+        >
+          <Link href={`/exams/${result.examId}/result`} style={{ display: 'block' }}>
             <Button variant="outline" size="sm" className="w-full gap-1">
               <Eye className="w-4 h-4" />
               查看详情
             </Button>
           </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </Box>
+      </Box>
+    </Paper>
   )
 }

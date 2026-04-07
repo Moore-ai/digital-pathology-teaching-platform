@@ -1,9 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Box, Typography, Stack, LinearProgress } from '@mui/material'
 import type { ClassScoreDistribution } from '@/lib/mock/results'
-import { cn } from '@/lib/utils'
 
 interface ClassScoreDistributionProps {
   distribution: ClassScoreDistribution
@@ -12,33 +11,43 @@ interface ClassScoreDistributionProps {
 
 export function ClassScoreDistribution({ distribution, totalStudents }: ClassScoreDistributionProps): ReactNode {
   const items = [
-    { label: '优秀', count: distribution.excellent, color: 'bg-success', textColor: 'text-success' },
-    { label: '良好', count: distribution.good, color: 'bg-secondary', textColor: 'text-secondary' },
-    { label: '及格', count: distribution.pass, color: 'bg-warning', textColor: 'text-warning' },
-    { label: '不及格', count: distribution.fail, color: 'bg-error', textColor: 'text-error' },
+    { label: '优秀', count: distribution.excellent, color: 'var(--success)' },
+    { label: '良好', count: distribution.good, color: 'var(--secondary)' },
+    { label: '及格', count: distribution.pass, color: 'var(--warning)' },
+    { label: '不及格', count: distribution.fail, color: 'var(--error)' },
   ]
 
   return (
-    <div className="space-y-3">
+    <Stack spacing={1.5}>
       {items.map((item) => {
         const percentage = totalStudents > 0 ? (item.count / totalStudents) * 100 : 0
         return (
-          <div key={item.label} className="space-y-1">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{item.label}</span>
-              <span className={cn("font-medium", item.textColor)}>
+          <Box key={item.label}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.5 }}>
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                {item.label}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: item.color }}>
                 {item.count} 人 ({percentage.toFixed(1)}%)
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className={cn("h-full rounded-full transition-all duration-500", item.color)}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
+              </Typography>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={percentage}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: 'var(--muted)',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  bgcolor: item.color,
+                  transition: 'width 0.5s',
+                },
+              }}
+            />
+          </Box>
         )
       })}
-    </div>
+    </Stack>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Paper, Box, Typography, Stack } from '@mui/material'
 import { TrendingUp, Crown, ArrowDown, Award } from 'lucide-react'
 import type { ResultStats } from '@/lib/mock/results'
 
@@ -15,49 +15,61 @@ export function ResultStatsCards({ stats }: ResultStatsCardsProps): ReactNode {
       icon: TrendingUp,
       label: '平均分',
       value: stats.averageScore.toFixed(1),
-      iconColor: 'text-secondary',
-      iconBg: 'bg-secondary/10',
+      iconColor: 'var(--secondary)',
+      iconBg: 'color-mix(in srgb, var(--secondary) 10%, transparent)',
     },
     {
       icon: Crown,
       label: '最高分',
       value: stats.highestScore,
-      iconColor: 'text-success',
-      iconBg: 'bg-success/10',
+      iconColor: 'var(--success)',
+      iconBg: 'color-mix(in srgb, var(--success) 10%, transparent)',
     },
     {
       icon: ArrowDown,
       label: '最低分',
       value: stats.lowestScore,
-      iconColor: 'text-warning',
-      iconBg: 'bg-warning/10',
+      iconColor: 'var(--warning)',
+      iconBg: 'color-mix(in srgb, var(--warning) 10%, transparent)',
     },
     {
       icon: Award,
       label: '当前排名',
       value: `${stats.currentRank}/${stats.totalStudents}`,
-      iconColor: 'text-primary',
-      iconBg: 'bg-primary/10',
+      iconColor: 'var(--primary)',
+      iconBg: 'color-mix(in srgb, var(--primary) 10%, transparent)',
     },
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
       {cards.map((card, index) => (
-        <Card key={index}>
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center`}>
-                <card.icon className={`w-5 h-5 ${card.iconColor}`} />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{card.value}</div>
-                <div className="text-sm text-muted-foreground">{card.label}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Paper key={index} sx={{ p: 2, bgcolor: 'var(--card)', border: '1px solid var(--border)' }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                bgcolor: card.iconBg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <card.icon className="w-5 h-5" style={{ color: card.iconColor }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>
+                {card.value}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+                {card.label}
+              </Typography>
+            </Box>
+          </Stack>
+        </Paper>
       ))}
-    </div>
+    </Box>
   )
 }

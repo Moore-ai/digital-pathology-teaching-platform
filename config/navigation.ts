@@ -14,7 +14,6 @@ import {
   LucideIcon,
   GraduationCap,
   FolderOpen,
-  Upload,
   Brain,
   Network,
   Target,
@@ -104,7 +103,7 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
     items: [
       ...coreNavItems,
       { title: '资料管理', href: '/resources', icon: FolderOpen },
-      { title: '上传资料', href: '/resources/upload', icon: Upload, roles: ['teacher', 'admin'] },
+      // { title: '上传资料', href: '/resources/upload', icon: Upload, roles: ['teacher', 'admin'] },
     ],
   },
   discussions: {
@@ -129,8 +128,6 @@ export const sidebarNavigation: Record<string, NavigationConfig> = {
     items: [
       ...coreNavItems,
       { title: '系统设置', href: '/system-settings', icon: Settings },
-      { title: '用户管理', href: '/system-settings/users', icon: Users },
-      { title: '系统日志', href: '/system-settings/logs', icon: History },
     ],
   },
   settings: {

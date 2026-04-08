@@ -2,10 +2,20 @@
 
 import type { ReactNode } from 'react'
 import { useState, useCallback, useRef, useMemo } from 'react'
-import { cn } from '@/lib/utils'
-import { Upload, FileText, FileVideo, Presentation, Microscope } from 'lucide-react'
 import { ResourceType } from '@/types/resource'
 import { detectFileType } from '@/lib/mock/resources'
+import {
+  Box,
+  Stack,
+  Typography,
+} from '@mui/material'
+import {
+  Upload,
+  FileText,
+  FileVideo,
+  Presentation,
+  Microscope,
+} from 'lucide-react'
 
 interface FileUploadZoneProps {
   onFilesSelect: (files: File[]) => void
@@ -16,10 +26,10 @@ interface FileUploadZoneProps {
 }
 
 const fileTypeIcons: Record<ResourceType, ReactNode> = {
-  pdf: <FileText className="w-5 h-5 text-error" />,
-  ppt: <Presentation className="w-5 h-5 text-warning" />,
-  video: <FileVideo className="w-5 h-5 text-purple-500" />,
-  svs: <Microscope className="w-5 h-5 text-secondary" />,
+  pdf: <FileText className="w-5 h-5" style={{ color: 'var(--error)' }} />,
+  ppt: <Presentation className="w-5 h-5" style={{ color: 'var(--warning)' }} />,
+  video: <FileVideo className="w-5 h-5" style={{ color: '#8B5CF6' }} />,
+  svs: <Microscope className="w-5 h-5" style={{ color: 'var(--secondary)' }} />,
 }
 
 const fileTypeLabels: Record<ResourceType, string> = {
@@ -111,22 +121,35 @@ export function FileUploadZone({
   }, [multiple, onFilesSelect])
 
   return (
-    <div
+    <Box
       onClick={handleClick}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className={cn(
-        'relative flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed cursor-pointer transition-all',
-        'hover:border-secondary/50 hover:bg-secondary/5',
-        isDragging && 'border-secondary bg-secondary/5',
-        disabled && 'opacity-50 cursor-not-allowed',
-        className,
-      )}
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 4,
+        borderRadius: 3,
+        border: '2px dashed',
+        borderColor: isDragging ? 'var(--secondary)' : 'var(--border)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        bgcolor: isDragging ? 'color-mix(in srgb, var(--secondary) 5%, transparent)' : 'transparent',
+        opacity: disabled ? 0.5 : 1,
+        transition: 'all 0.2s',
+        '&:hover': {
+          borderColor: disabled ? 'var(--border)' : 'color-mix(in srgb, var(--secondary) 50%, transparent)',
+          bgcolor: disabled ? 'transparent' : 'color-mix(in srgb, var(--secondary) 5%, transparent)',
+        },
+      }}
       role="button"
       tabIndex={0}
       aria-label="点击或拖拽文件到此处上传"
+      className={className}
     >
       <input
         ref={inputRef}
@@ -134,41 +157,52 @@ export function FileUploadZone({
         accept={acceptedExtensions.join(',')}
         multiple={multiple}
         onChange={handleFileChange}
-        className="hidden"
+        style={{ display: 'none' }}
         disabled={disabled}
         aria-label="选择文件"
       />
 
       {/* 图标 */}
-      <div className={cn(
-        'w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors',
-        isDragging ? 'bg-secondary/10' : 'bg-muted',
-      )}>
-        <Upload className={cn(
-          'w-8 h-8 transition-colors',
-          isDragging ? 'text-secondary' : 'text-muted-foreground',
-        )} />
-      </div>
+      <Box
+        sx={{
+          width: 64,
+          height: 64,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2,
+          bgcolor: isDragging ? 'color-mix(in srgb, var(--secondary) 10%, transparent)' : 'var(--muted)',
+          transition: 'background-color 0.2s',
+        }}
+      >
+        <Upload
+          className="w-8 h-8"
+          style={{ color: isDragging ? 'var(--secondary)' : 'var(--muted-foreground)' }}
+        />
+      </Box>
 
       {/* 提示文字 */}
-      <div className="text-center">
-        <p className="text-base font-medium text-foreground mb-1">
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant="body1" sx={{ fontWeight: 500, color: 'var(--foreground)', mb: 0.5 }}>
           {isDragging ? '释放文件以上传' : '拖拽文件到此处，或点击选择'}
-        </p>
-        <p className="text-sm text-muted-foreground mb-4">
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', mb: 2 }}>
           单个文件最大 2 GB
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
       {/* 支持的文件类型 */}
-      <div className="flex items-center gap-4">
+      <Stack direction="row" spacing={2}>
         {acceptedTypes.map(type => (
-          <div key={type} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Stack key={type} direction="row" alignItems="center" spacing={0.5}>
             {fileTypeIcons[type]}
-            <span>{fileTypeLabels[type]}</span>
-          </div>
+            <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
+              {fileTypeLabels[type]}
+            </Typography>
+          </Stack>
         ))}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 }

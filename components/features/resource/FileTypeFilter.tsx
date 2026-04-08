@@ -1,7 +1,6 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { FileText, FileVideo, Presentation, Microscope, Layers } from 'lucide-react'
 import { ResourceType } from '@/types/resource'
@@ -29,7 +28,7 @@ export function FileTypeFilter({
   const stats = getFileTypeStats()
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div className={`flex flex-wrap gap-2 ${className || ''}`}>
       {filterOptions.map(option => {
         const count = option.type === 'all'
           ? Object.values(stats).reduce((a, b) => a + b, 0)
@@ -47,10 +46,15 @@ export function FileTypeFilter({
           >
             {option.icon}
             <span>{option.label}</span>
-            <span className={cn(
-              'text-xs px-1.5 py-0.5 rounded',
-              isSelected ? 'bg-primary-foreground/20' : 'bg-muted',
-            )}>
+            <span
+              className="text-xs px-1.5 py-0.5 rounded"
+              style={{
+                backgroundColor: isSelected
+                  ? 'color-mix(in srgb, var(--primary-foreground) 20%, transparent)'
+                  : 'var(--muted)',
+                color: isSelected ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+              }}
+            >
               {count}
             </span>
           </Button>

@@ -1,7 +1,6 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -47,16 +46,17 @@ const fileTypeLabels: Record<ResourceType, string> = {
   svs: '切片',
 }
 
-const categoryColors: Record<string, string> = {
-  digestive: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  respiratory: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
-  breast: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-  endocrine: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
-  urinary: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-  nervous: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-  cardiovascular: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
-  reproductive: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
-  other: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+// 使用 CSS 变量确保深浅色模式正确显示
+const categoryStyles: Record<string, React.CSSProperties> = {
+  digestive: { backgroundColor: 'color-mix(in srgb, #F59E0B 15%, transparent)', color: '#F59E0B' },
+  respiratory: { backgroundColor: 'color-mix(in srgb, #0EA5E9 15%, transparent)', color: '#0EA5E9' },
+  breast: { backgroundColor: 'color-mix(in srgb, #EC4899 15%, transparent)', color: '#EC4899' },
+  endocrine: { backgroundColor: 'color-mix(in srgb, #8B5CF6 15%, transparent)', color: '#8B5CF6' },
+  urinary: { backgroundColor: 'color-mix(in srgb, #10B981 15%, transparent)', color: '#10B981' },
+  nervous: { backgroundColor: 'color-mix(in srgb, #6366F1 15%, transparent)', color: '#6366F1' },
+  cardiovascular: { backgroundColor: 'color-mix(in srgb, #F43F5E 15%, transparent)', color: '#F43F5E' },
+  reproductive: { backgroundColor: 'color-mix(in srgb, #D946EF 15%, transparent)', color: '#D946EF' },
+  other: { backgroundColor: 'var(--muted)', color: 'var(--foreground)' },
 }
 
 export function ResourceCard({
@@ -73,18 +73,17 @@ export function ResourceCard({
   const hasActions = onEdit || onDelete
 
   return (
-    <Card className={cn('group overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col', className)}>
+    <Card className={`group overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col ${className || ''}`}>
       {/* 缩略图区域 */}
       <div className="relative aspect-4/3 bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden shrink-0">
         {/* 文件类型图标居中 */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className={cn(
-            'w-20 h-20 rounded-xl flex items-center justify-center',
-            resource.type === 'pdf' && 'bg-error/10',
-            resource.type === 'ppt' && 'bg-warning/10',
-            resource.type === 'video' && 'bg-purple-500/10',
-            resource.type === 'svs' && 'bg-secondary/10',
-          )}>
+          <div className={`w-20 h-20 rounded-xl flex items-center justify-center ${
+            resource.type === 'pdf' ? 'bg-error/10' :
+            resource.type === 'ppt' ? 'bg-warning/10' :
+            resource.type === 'video' ? 'bg-purple-500/10' :
+            'bg-secondary/10'
+          }`}>
             {fileTypeIcons[resource.type]}
           </div>
         </div>
@@ -98,9 +97,12 @@ export function ResourceCard({
 
         {/* 分类标签 */}
         <div className="absolute top-3 right-3">
-          <Badge className={cn('text-xs', categoryColors[resource.category] || categoryColors.other)}>
+          <span
+            className="inline-flex h-5 items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium"
+            style={categoryStyles[resource.category] || categoryStyles.other}
+          >
             {categoryLabels[resource.category]}
-          </Badge>
+          </span>
         </div>
 
         {/* 视频时长 */}

@@ -1,10 +1,15 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { UploadFile } from '@/types/resource'
 import { UploadQueueItem } from './UploadQueueItem'
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  Chip,
+} from '@mui/material'
 
 interface UploadQueueListProps {
   items: UploadFile[]
@@ -35,32 +40,68 @@ export function UploadQueueList({
   const pendingCount = items.filter(i => i.status === 'pending').length
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} className={className}>
       {/* 标题和统计 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-medium text-foreground">
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: 'var(--foreground)' }}>
             上传队列 ({items.length} 个文件)
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
             {uploadingCount > 0 && (
-              <span className="text-secondary">{uploadingCount} 个上传中</span>
+              <Chip
+                size="small"
+                label={`${uploadingCount} 个上传中`}
+                sx={{
+                  height: 20,
+                  fontSize: '0.625rem',
+                  bgcolor: 'color-mix(in srgb, var(--secondary) 10%, transparent)',
+                  '& .MuiChip-label': { color: 'var(--secondary)' },
+                }}
+              />
             )}
             {successCount > 0 && (
-              <span className="text-success">{successCount} 个完成</span>
+              <Chip
+                size="small"
+                label={`${successCount} 个完成`}
+                sx={{
+                  height: 20,
+                  fontSize: '0.625rem',
+                  bgcolor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+                  '& .MuiChip-label': { color: 'var(--success)' },
+                }}
+              />
             )}
             {errorCount > 0 && (
-              <span className="text-error">{errorCount} 个失败</span>
+              <Chip
+                size="small"
+                label={`${errorCount} 个失败`}
+                sx={{
+                  height: 20,
+                  fontSize: '0.625rem',
+                  bgcolor: 'color-mix(in srgb, var(--error) 10%, transparent)',
+                  '& .MuiChip-label': { color: 'var(--error)' },
+                }}
+              />
             )}
             {pendingCount > 0 && (
-              <span>{pendingCount} 个等待中</span>
+              <Chip
+                size="small"
+                label={`${pendingCount} 个等待中`}
+                sx={{
+                  height: 20,
+                  fontSize: '0.625rem',
+                  bgcolor: 'var(--muted)',
+                  '& .MuiChip-label': { color: 'var(--muted-foreground)' },
+                }}
+              />
             )}
-          </div>
-        </div>
-      </div>
+          </Stack>
+        </Stack>
+      </Stack>
 
       {/* 队列列表 */}
-      <div className="space-y-2">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {items.map(item => (
           <UploadQueueItem
             key={item.id}
@@ -71,21 +112,33 @@ export function UploadQueueList({
             onEdit={() => onEdit?.(item.id)}
           />
         ))}
-      </div>
+      </Box>
 
       {/* 操作按钮 */}
-      <div className="flex items-center justify-end gap-2 pt-2">
+      <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ pt: 1 }}>
         {items.some(i => i.status === 'pending') && onUploadAll && (
-          <Button onClick={onUploadAll}>
+          <Button
+            variant="contained"
+            onClick={onUploadAll}
+            sx={{ bgcolor: 'var(--primary)', '&:hover': { bgcolor: 'var(--primary)', opacity: 0.9 } }}
+          >
             全部上传
           </Button>
         )}
         {items.length > 0 && onClearAll && (
-          <Button variant="outline" onClick={onClearAll}>
+          <Button
+            variant="outlined"
+            onClick={onClearAll}
+            sx={{
+              borderColor: 'var(--border)',
+              color: 'var(--foreground)',
+              '&:hover': { borderColor: 'var(--border)', bgcolor: 'var(--muted)' },
+            }}
+          >
             清空队列
           </Button>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 }

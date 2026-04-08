@@ -10,12 +10,6 @@ import { useResourceStore } from '@/stores/resourceStore'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -27,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Search, Plus, SlidersHorizontal } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { Box, Typography, Modal } from '@mui/material'
 
 export default function ResourcesPage(): ReactNode {
   const [selectedType, setSelectedType] = useState<ResourceType | 'all'>('all')
@@ -180,21 +175,47 @@ export default function ResourcesPage(): ReactNode {
         </div>
       )}
 
-      {/* 编辑对话框 */}
-      <Dialog open={!!editingResource} onOpenChange={(open) => !open && setEditingResource(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>编辑资料详情</DialogTitle>
-          </DialogHeader>
-          {editingResource && (
-            <ResourceEditForm
-              resource={editingResource}
-              onSave={handleSaveEdit}
-              onCancel={() => setEditingResource(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* 编辑对话框 - 黄金分割比例 1.618:1 */}
+      <Modal
+        open={!!editingResource}
+        onClose={() => setEditingResource(null)}
+        aria-labelledby="edit-dialog-title"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 900,
+            height: 556,
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            bgcolor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 2,
+            boxShadow: 24,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Box sx={{ px: 2, py: 1, borderBottom: '1px solid var(--border)', flexShrink: 0, lineHeight: 1 }}>
+            <Typography sx={{ fontWeight: 600, color: 'var(--foreground)', fontSize: '1rem', lineHeight: 1.5 }}>
+              编辑资料详情
+            </Typography>
+          </Box>
+          <Box sx={{ px: 2, py: 1.5, overflow: 'auto', flex: 1 }}>
+            {editingResource && (
+              <ResourceEditForm
+                resource={editingResource}
+                onSave={handleSaveEdit}
+                onCancel={() => setEditingResource(null)}
+              />
+            )}
+          </Box>
+        </Box>
+      </Modal>
 
       {/* 删除确认对话框 */}
       <AlertDialog open={!!deletingResource} onOpenChange={(open) => !open && setDeletingResource(null)}>
